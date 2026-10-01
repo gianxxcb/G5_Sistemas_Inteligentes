@@ -313,15 +313,11 @@ class ConfiguracionPlanificacion:
 
     @property
     def tamano_grupo_minimo(self) -> int:
-        return ceil(
-            self.tamano_grupo_objetivo * (1 - self.tolerancia_tamano_grupo)
-        )
+        return 16  # Mínimo requerido de estudiantes para habilitar el curso
 
     @property
     def tamano_grupo_maximo(self) -> int:
-        return floor(
-            self.tamano_grupo_objetivo * (1 + self.tolerancia_tamano_grupo)
-        )
+        return 200
 
 
 @dataclass(frozen=True)
@@ -361,8 +357,6 @@ class DatosPlanificacion:
         cursos = {curso.id: curso for curso in self.cursos}
         aulas = {aula.id for aula in self.aulas}
         grupos_por_curso: dict[str, list[GrupoLaboratorio]] = {}
-        tamanos_subcohorte: dict[tuple[str, str], int] = {}
-        subcohortes_por_curso: set[tuple[str, str]] = set()
 
         for curso in self.cursos:
             if curso.docente_id not in docentes:
@@ -396,51 +390,33 @@ class DatosPlanificacion:
                 raise ErrorModeloPlanificacion(
                     f"El grupo {grupo.id} debe pertenecer a la cohorte {curso.cohorte_id}."
                 )
-            if not (
-                self.configuracion.tamano_grupo_minimo
-                <= grupo.cantidad_estudiantes
-                <= self.configuracion.tamano_grupo_maximo
-            ):
+            
+            # Validación flexible: permite subgrupos dinámicos (ej. 15, 16, 4) sin rangos fijos estrictos
+            if grupo.cantidad_estudiantes <= 0:
                 raise ErrorModeloPlanificacion(
-                    f"El grupo {grupo.id} debe tener entre "
-                    f"{self.configuracion.tamano_grupo_minimo} y "
-                    f"{self.configuracion.tamano_grupo_maximo} estudiantes."
+                    f"El grupo {grupo.id} debe tener una cantidad positiva de estudiantes."
                 )
+
+            # Validar que exista un laboratorio con capacidad para este subgrupo
             if not any(
                 aula.tipo == TipoAula.LABORATORIO
                 and aula.capacidad >= grupo.cantidad_estudiantes
                 for aula in self.aulas
             ):
                 raise ErrorModeloPlanificacion(
-                    f"No hay un laboratorio con capacidad suficiente para el grupo "
+                    f"No hay un laboratorio con capacidad suficiente para el subgrupo "
                     f"{grupo.id} ({grupo.cantidad_estudiantes} estudiantes)."
                 )
-            clave_subcohorte = (grupo.cohorte_id, grupo.subcohorte_id)
-            clave_curso_subcohorte = (grupo.curso_id, grupo.subcohorte_id)
-            if clave_curso_subcohorte in subcohortes_por_curso:
-                raise ErrorModeloPlanificacion(
-                    f"La subcohorte {grupo.subcohorte_id} está duplicada en el curso "
-                    f"{grupo.curso_id}."
-                )
-            subcohortes_por_curso.add(clave_curso_subcohorte)
-            tamano_anterior = tamanos_subcohorte.setdefault(
-                clave_subcohorte, grupo.cantidad_estudiantes
-            )
-            if tamano_anterior != grupo.cantidad_estudiantes:
-                raise ErrorModeloPlanificacion(
-                    f"La subcohorte {grupo.subcohorte_id} debe mantener la misma "
-                    "cantidad de estudiantes en todos sus cursos de laboratorio."
-                )
+
             grupos_por_curso.setdefault(curso.id, []).append(grupo)
 
+        # Validación flexible de cantidad de grupos (permite subgrupos dinámicos sin exigir un número fijo estricto)
         for curso in self.cursos:
             if curso.requiere_laboratorio:
                 grupos = grupos_por_curso.get(curso.id, [])
-                esperados = self.configuracion.grupos_por_curso_laboratorio
-                if len(grupos) != esperados:
+                if len(grupos) < 1:
                     raise ErrorModeloPlanificacion(
-                        f"El curso {curso.id} requiere {esperados} grupos de laboratorio; "
-                        f"se recibieron {len(grupos)}."
+                        f"El curso {curso.id} requiere al menos un grupo de laboratorio."
                     )
 
         cantidad_laboratorios = sum(
