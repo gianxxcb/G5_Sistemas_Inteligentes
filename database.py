@@ -1,152 +1,73 @@
-"""Base de conocimiento en memoria para aulas y reservas.
-
-Este módulo solo almacena y consulta información. No decide prioridades ni
-aplica reglas del sistema experto.
-"""
-
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-
 from config import FORMATO_HORA, PABELLON_A, PABELLON_B, PABELLON_C
 
 DatosAula = Dict[str, Any]
 
-
-def _crear_aula(
-    identificador: str,
-    pabellon: str,
-    nombre: str,
-    tipo: str,
-    aforo_maximo: int,
-    tiene_computadoras: bool,
-    tiene_proyector_integrado: bool,
-    coordenada_x: int,
-    coordenada_y: int,
-) -> DatosAula:
-    """Construye una estructura de aula uniforme para la base en memoria."""
+def _crear_aula(identificador, pabellon, nombre, tipo, aforo_maximo, tiene_computadoras, proyector, x, y):
     return {
-        "id": identificador,
-        "pabellon": pabellon,
-        "nombre": nombre,
-        "tipo": tipo,
-        "aforo_max": aforo_maximo,
-        "tiene_computadoras": tiene_computadoras,
-        "tiene_proyector_integrado": tiene_proyector_integrado,
-        "coordenada_x": coordenada_x,
-        "coordenada_y": coordenada_y,
-        "reservas": [],
+        "id": identificador, "pabellon": pabellon, "nombre": nombre, "tipo": tipo,
+        "aforo_max": aforo_maximo, "tiene_computadoras": tiene_computadoras,
+        "tiene_proyector_integrado": proyector, "coordenada_x": x, "coordenada_y": y, "reservas": [],
     }
 
+_AULAS: Dict[str, DatosAula] = {}
 
-# Base de conocimiento inicial. Las reservas pueden añadirse mediante
-# add_reservation para probar conflictos de horario.
-_AULAS: Dict[str, DatosAula] = {
-    "A101": _crear_aula(
-        "A101", PABELLON_A, "Aula 101", "teoria", 45, False, True, 0, 10
-    ),
-    "A102": _crear_aula(
-        "A102", PABELLON_A, "Aula 102", "teoria", 25, False, False, 0, 14
-    ),
-    "B201": _crear_aula(
-        "B201", PABELLON_B, "Laboratorio 201", "laboratorio", 40, True, True, 5, 12
-    ),
-    "B202": _crear_aula(
-        "B202", PABELLON_B, "Laboratorio 202", "laboratorio", 25, True, False, 5, 16
-    ),
-    "B203": _crear_aula(
-        "B203", PABELLON_B, "Laboratorio 203", "laboratorio", 35, True, True, 7, 12
-    ),
-    "C101": _crear_aula(
-        "C101", PABELLON_C, "Aula 101", "teoria", 60, False, True, 11, 8
-    ),
-    "C102": _crear_aula(
-        "C102", PABELLON_C, "Aula 102", "teoria", 35, False, False, 11, 12
-    ),
-}
+# Carga de A101 a A107
+for idx, i in enumerate(range(101, 108)):
+    _AULAS[f"A{i}"] = _crear_aula(f"A{i}", PABELLON_A, f"Aula A{i}", "teoria", 30 + (idx * 5), False, True, 0, idx)
 
+# Carga de B201 a B207 (B201 a B205 son Laboratorios equipados)
+for idx, i in enumerate(range(201, 208)):
+    es_lab = (i <= 205)
+    _AULAS[f"B{i}"] = _crear_aula(
+        f"B{i}", PABELLON_B, f"Laboratorio B{i}" if es_lab else f"Aula B{i}",
+        "laboratorio" if es_lab else "teoria", 35 + (idx * 5), es_lab, True, 5, idx
+    )
+
+# Carga de C101 a C107
+for idx, i in enumerate(range(101, 108)):
+    _AULAS[f"C{i}"] = _crear_aula(f"C{i}", PABELLON_C, f"Aula C{i}", "teoria", 30 + (idx * 5), False, True, 10, idx)
 
 def _convertir_hora_a_minutos(hora: str) -> int:
-    """Convierte una hora HH:MM a minutos desde medianoche."""
-    return datetime.strptime(hora, FORMATO_HORA).hour * 60 + datetime.strptime(
-        hora, FORMATO_HORA
-    ).minute
+    h_str = hora.upper().strip().replace(".", "")
+    if "PM" in h_str or "AM" in h_str:
+        es_pm = "PM" in h_str
+        h_limpia = h_str.replace("PM", "").replace("AM", "").strip()
+        partes = h_limpia.split(":")
+        h = int(partes[0])
+        m = int(partes[1]) if len(partes) > 1 else 0
+        if es_pm and h < 12: h += 12
+        if not es_pm and h == 12: h = 0
+        return h * 60 + m
+    partes = h_str.split(":")
+    return int(partes[0]) * 60 + (int(partes[1]) if len(partes) > 1 else 0)
 
-
-def _horarios_se_superponen(
-    inicio_1: str, fin_1: str, inicio_2: str, fin_2: str
-) -> bool:
-    """Indica si dos intervalos horarios se superponen."""
-    inicio_1_minutos = _convertir_hora_a_minutos(inicio_1)
-    fin_1_minutos = _convertir_hora_a_minutos(fin_1)
-    inicio_2_minutos = _convertir_hora_a_minutos(inicio_2)
-    fin_2_minutos = _convertir_hora_a_minutos(fin_2)
-    return inicio_1_minutos < fin_2_minutos and inicio_2_minutos < fin_1_minutos
-
+def _horarios_se_superponen(inicio_1, fin_1, inicio_2, fin_2) -> bool:
+    return _convertir_hora_a_minutos(inicio_1) < _convertir_hora_a_minutos(fin_2) and _convertir_hora_a_minutos(inicio_2) < _convertir_hora_a_minutos(fin_1)
 
 def get_all_rooms() -> List[DatosAula]:
-    """Devuelve copias de todas las aulas para evitar mutaciones accidentales."""
     return deepcopy(list(_AULAS.values()))
 
-
 def get_room_by_id(room_id: str) -> Optional[DatosAula]:
-    """Busca un aula por identificador y devuelve una copia, o None si no existe."""
     aula = _AULAS.get(room_id.upper())
     return deepcopy(aula) if aula is not None else None
 
-
 def is_room_available(room_id: str, start_time: str, end_time: str) -> bool:
-    """Verifica que un aula exista y no tenga reservas que se superpongan."""
     aula = _AULAS.get(room_id.upper())
-    if aula is None:
-        return False
-
+    if aula is None: return False
     for reserva in aula["reservas"]:
-        if _horarios_se_superponen(
-            start_time, end_time, reserva["horario_inicio"], reserva["horario_fin"]
-        ):
+        if _horarios_se_superponen(start_time, end_time, reserva["horario_inicio"], reserva["horario_fin"]):
             return False
     return True
 
-
 def get_available_rooms(start_time: str, end_time: str) -> List[DatosAula]:
-    """Devuelve todas las aulas libres para el intervalo solicitado."""
-    return [
-        aula
-        for aula in get_all_rooms()
-        if is_room_available(aula["id"], start_time, end_time)
-    ]
-
+    return [aula for aula in get_all_rooms() if is_room_available(aula["id"], start_time, end_time)]
 
 def add_reservation(room_id: str, start_time: str, end_time: str, materia: str) -> bool:
-    """Registra una reserva si el aula existe y está libre; devuelve si tuvo éxito."""
     aula = _AULAS.get(room_id.upper())
     if aula is None or not is_room_available(room_id, start_time, end_time):
         return False
-
-    aula["reservas"].append(
-        {
-            "horario_inicio": start_time,
-            "horario_fin": end_time,
-            "materia": materia.strip(),
-        }
-    )
+    aula["reservas"].append({"horario_inicio": start_time, "horario_fin": end_time, "materia": materia.strip()})
     return True
-
-
-def get_room_distance(room_id_1: str, room_id_2: str) -> Optional[float]:
-    """Calcula distancia euclídea entre dos aulas, útil para el módulo A*."""
-    aula_1 = _AULAS.get(room_id_1.upper())
-    aula_2 = _AULAS.get(room_id_2.upper())
-    if aula_1 is None or aula_2 is None:
-        return None
-
-    diferencia_x = aula_1["coordenada_x"] - aula_2["coordenada_x"]
-    diferencia_y = aula_1["coordenada_y"] - aula_2["coordenada_y"]
-    return (diferencia_x**2 + diferencia_y**2) ** 0.5
-
-
-if __name__ == "__main__":
-    print("Aulas disponibles entre 09:00 y 11:00:")
-    for aula in get_available_rooms("09:00", "11:00"):
-        print(f"- {aula['id']}: {aula['nombre']}")

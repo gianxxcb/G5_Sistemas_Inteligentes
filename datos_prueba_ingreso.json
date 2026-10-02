@@ -1,206 +1,321 @@
 {
   "configuracion": {
-    "cursos_por_semestre": 35,
-    "cursos_con_laboratorio": 15,
+    "cursos_por_semestre": 6,
+    "cursos_con_laboratorio": 4,
     "grupos_por_curso_laboratorio": 3,
     "cantidad_aulas_laboratorio": 5,
-    "tamano_grupo_objetivo": 50,
+    "tamano_grupo_objetivo": 34,
     "tolerancia_tamano_grupo": 0.1,
-    "max_horarios": 5,
-    "dias_activos_objetivo": 4,
-    "dias_habiles": ["lunes", "martes", "miercoles", "jueves", "viernes"]
+    "max_horarios": 1,
+    "dias_activos_objetivo": 5,
+    "dias_habiles": [
+      "lunes",
+      "martes",
+      "miercoles",
+      "jueves",
+      "viernes"
+    ]
   },
   "docentes": [
     {
-      "id": "doc-programacion",
-      "nombre": "Ana Torres",
+      "id": "doc-1",
+      "nombre": "Docente Principal UNT",
       "disponibilidad": [
-        {"dia": "lunes", "hora_inicio": "07:00", "hora_fin": "17:00"},
-        {"dia": "martes", "hora_inicio": "07:00", "hora_fin": "17:00"},
-        {"dia": "miercoles", "hora_inicio": "07:00", "hora_fin": "17:00"},
-        {"dia": "jueves", "hora_inicio": "07:00", "hora_fin": "17:00"},
-        {"dia": "viernes", "hora_inicio": "07:00", "hora_fin": "17:00"}
-      ]
-    },
-    {
-      "id": "doc-matematicas",
-      "nombre": "Luis Mendoza",
-      "disponibilidad": [
-        {"dia": "lunes", "hora_inicio": "08:00", "hora_fin": "18:00"},
-        {"dia": "martes", "hora_inicio": "08:00", "hora_fin": "18:00"},
-        {"dia": "miercoles", "hora_inicio": "08:00", "hora_fin": "18:00"},
-        {"dia": "jueves", "hora_inicio": "08:00", "hora_fin": "18:00"},
-        {"dia": "viernes", "hora_inicio": "08:00", "hora_fin": "18:00"}
-      ]
-    },
-    {
-      "id": "doc-estructuras",
-      "nombre": "María Salazar",
-      "disponibilidad": [
-        {"dia": "lunes", "hora_inicio": "09:00", "hora_fin": "19:00"},
-        {"dia": "martes", "hora_inicio": "09:00", "hora_fin": "19:00"},
-        {"dia": "miercoles", "hora_inicio": "09:00", "hora_fin": "19:00"},
-        {"dia": "jueves", "hora_inicio": "09:00", "hora_fin": "19:00"},
-        {"dia": "viernes", "hora_inicio": "09:00", "hora_fin": "19:00"}
-      ]
-    },
-    {
-      "id": "doc-arquitectura",
-      "nombre": "Carlos Rojas",
-      "disponibilidad": [
-        {"dia": "lunes", "hora_inicio": "10:00", "hora_fin": "20:00"},
-        {"dia": "martes", "hora_inicio": "10:00", "hora_fin": "20:00"},
-        {"dia": "miercoles", "hora_inicio": "10:00", "hora_fin": "20:00"},
-        {"dia": "jueves", "hora_inicio": "10:00", "hora_fin": "20:00"},
-        {"dia": "viernes", "hora_inicio": "10:00", "hora_fin": "20:00"}
-      ]
-    },
-    {
-      "id": "doc-bases-datos",
-      "nombre": "Patricia Vega",
-      "disponibilidad": [
-        {"dia": "lunes", "hora_inicio": "07:00", "hora_fin": "16:00"},
-        {"dia": "martes", "hora_inicio": "07:00", "hora_fin": "16:00"},
-        {"dia": "miercoles", "hora_inicio": "07:00", "hora_fin": "16:00"},
-        {"dia": "jueves", "hora_inicio": "07:00", "hora_fin": "16:00"},
-        {"dia": "viernes", "hora_inicio": "07:00", "hora_fin": "16:00"}
-      ]
-    },
-    {
-      "id": "doc-estadistica",
-      "nombre": "Jorge Castillo",
-      "disponibilidad": [
-        {"dia": "lunes", "hora_inicio": "11:00", "hora_fin": "20:00"},
-        {"dia": "martes", "hora_inicio": "11:00", "hora_fin": "20:00"},
-        {"dia": "miercoles", "hora_inicio": "11:00", "hora_fin": "20:00"},
-        {"dia": "jueves", "hora_inicio": "11:00", "hora_fin": "20:00"},
-        {"dia": "viernes", "hora_inicio": "11:00", "hora_fin": "20:00"}
-      ]
-    },
-    {
-      "id": "doc-ingenieria-software",
-      "nombre": "Rosa Paredes",
-      "disponibilidad": [
-        {"dia": "lunes", "hora_inicio": "12:00", "hora_fin": "20:00"},
-        {"dia": "martes", "hora_inicio": "12:00", "hora_fin": "20:00"},
-        {"dia": "miercoles", "hora_inicio": "12:00", "hora_fin": "20:00"},
-        {"dia": "jueves", "hora_inicio": "12:00", "hora_fin": "20:00"},
-        {"dia": "viernes", "hora_inicio": "12:00", "hora_fin": "20:00"}
+        {
+          "dia": "lunes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "martes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "miercoles",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "jueves",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "viernes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        }
       ]
     }
   ],
   "cursos": [
-    {"id": "p2022-programacion", "nombre": "Programación I", "docente_id": "doc-programacion", "cohorte_id": "promocion-2022", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2022-matematicas", "nombre": "Matemática Discreta", "docente_id": "doc-matematicas", "cohorte_id": "promocion-2022", "duracion_minutos": 120},
-    {"id": "p2022-estructuras", "nombre": "Estructuras de Datos", "docente_id": "doc-estructuras", "cohorte_id": "promocion-2022", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2022-arquitectura", "nombre": "Arquitectura de Computadoras", "docente_id": "doc-arquitectura", "cohorte_id": "promocion-2022", "duracion_minutos": 120},
-    {"id": "p2022-bases-datos", "nombre": "Bases de Datos", "docente_id": "doc-bases-datos", "cohorte_id": "promocion-2022", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2022-estadistica", "nombre": "Probabilidad y Estadística", "docente_id": "doc-estadistica", "cohorte_id": "promocion-2022", "duracion_minutos": 120},
-    {"id": "p2022-ingenieria-software", "nombre": "Ingeniería de Software", "docente_id": "doc-ingenieria-software", "cohorte_id": "promocion-2022", "duracion_minutos": 120},
-
-    {"id": "p2023-programacion", "nombre": "Programación I", "docente_id": "doc-programacion", "cohorte_id": "promocion-2023", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2023-matematicas", "nombre": "Matemática Discreta", "docente_id": "doc-matematicas", "cohorte_id": "promocion-2023", "duracion_minutos": 120},
-    {"id": "p2023-estructuras", "nombre": "Estructuras de Datos", "docente_id": "doc-estructuras", "cohorte_id": "promocion-2023", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2023-arquitectura", "nombre": "Arquitectura de Computadoras", "docente_id": "doc-arquitectura", "cohorte_id": "promocion-2023", "duracion_minutos": 120},
-    {"id": "p2023-bases-datos", "nombre": "Bases de Datos", "docente_id": "doc-bases-datos", "cohorte_id": "promocion-2023", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2023-estadistica", "nombre": "Probabilidad y Estadística", "docente_id": "doc-estadistica", "cohorte_id": "promocion-2023", "duracion_minutos": 120},
-    {"id": "p2023-ingenieria-software", "nombre": "Ingeniería de Software", "docente_id": "doc-ingenieria-software", "cohorte_id": "promocion-2023", "duracion_minutos": 120},
-
-    {"id": "p2024-programacion", "nombre": "Programación I", "docente_id": "doc-programacion", "cohorte_id": "promocion-2024", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2024-matematicas", "nombre": "Matemática Discreta", "docente_id": "doc-matematicas", "cohorte_id": "promocion-2024", "duracion_minutos": 120},
-    {"id": "p2024-estructuras", "nombre": "Estructuras de Datos", "docente_id": "doc-estructuras", "cohorte_id": "promocion-2024", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2024-arquitectura", "nombre": "Arquitectura de Computadoras", "docente_id": "doc-arquitectura", "cohorte_id": "promocion-2024", "duracion_minutos": 120},
-    {"id": "p2024-bases-datos", "nombre": "Bases de Datos", "docente_id": "doc-bases-datos", "cohorte_id": "promocion-2024", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2024-estadistica", "nombre": "Probabilidad y Estadística", "docente_id": "doc-estadistica", "cohorte_id": "promocion-2024", "duracion_minutos": 120},
-    {"id": "p2024-ingenieria-software", "nombre": "Ingeniería de Software", "docente_id": "doc-ingenieria-software", "cohorte_id": "promocion-2024", "duracion_minutos": 120},
-
-    {"id": "p2025-programacion", "nombre": "Programación I", "docente_id": "doc-programacion", "cohorte_id": "promocion-2025", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2025-matematicas", "nombre": "Matemática Discreta", "docente_id": "doc-matematicas", "cohorte_id": "promocion-2025", "duracion_minutos": 120},
-    {"id": "p2025-estructuras", "nombre": "Estructuras de Datos", "docente_id": "doc-estructuras", "cohorte_id": "promocion-2025", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2025-arquitectura", "nombre": "Arquitectura de Computadoras", "docente_id": "doc-arquitectura", "cohorte_id": "promocion-2025", "duracion_minutos": 120},
-    {"id": "p2025-bases-datos", "nombre": "Bases de Datos", "docente_id": "doc-bases-datos", "cohorte_id": "promocion-2025", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2025-estadistica", "nombre": "Probabilidad y Estadística", "docente_id": "doc-estadistica", "cohorte_id": "promocion-2025", "duracion_minutos": 120},
-    {"id": "p2025-ingenieria-software", "nombre": "Ingeniería de Software", "docente_id": "doc-ingenieria-software", "cohorte_id": "promocion-2025", "duracion_minutos": 120},
-
-    {"id": "p2026-programacion", "nombre": "Programación I", "docente_id": "doc-programacion", "cohorte_id": "promocion-2026", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2026-matematicas", "nombre": "Matemática Discreta", "docente_id": "doc-matematicas", "cohorte_id": "promocion-2026", "duracion_minutos": 120},
-    {"id": "p2026-estructuras", "nombre": "Estructuras de Datos", "docente_id": "doc-estructuras", "cohorte_id": "promocion-2026", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2026-arquitectura", "nombre": "Arquitectura de Computadoras", "docente_id": "doc-arquitectura", "cohorte_id": "promocion-2026", "duracion_minutos": 120},
-    {"id": "p2026-bases-datos", "nombre": "Bases de Datos", "docente_id": "doc-bases-datos", "cohorte_id": "promocion-2026", "duracion_minutos": 120, "requiere_laboratorio": true},
-    {"id": "p2026-estadistica", "nombre": "Probabilidad y Estadística", "docente_id": "doc-estadistica", "cohorte_id": "promocion-2026", "duracion_minutos": 120},
-    {"id": "p2026-ingenieria-software", "nombre": "Ingeniería de Software", "docente_id": "doc-ingenieria-software", "cohorte_id": "promocion-2026", "duracion_minutos": 120}
+    {
+      "id": "p2022-inteligentes",
+      "nombre": "Sistemas Inteligentes",
+      "docente_id": "doc-1",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 120,
+      "requiere_laboratorio": true
+    },
+    {
+      "id": "p2022-algoritmos",
+      "nombre": "Algoritmos y Estructura de Datos",
+      "docente_id": "doc-1",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 240,
+      "requiere_laboratorio": false
+    },
+    {
+      "id": "p2022-sistemas",
+      "nombre": "Ingeniería de Sistemas",
+      "docente_id": "doc-1",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 120,
+      "requiere_laboratorio": false
+    },
+    {
+      "id": "p2022-basedatos1",
+      "nombre": "Base de Datos I",
+      "docente_id": "doc-1",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 180,
+      "requiere_laboratorio": true
+    },
+    {
+      "id": "p2022-grafica",
+      "nombre": "Ingeniería Gráfica",
+      "docente_id": "doc-1",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 120,
+      "requiere_laboratorio": true
+    },
+    {
+      "id": "p2022-software",
+      "nombre": "Ingeniería de Software",
+      "docente_id": "doc-1",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 120,
+      "requiere_laboratorio": true
+    }
   ],
   "grupos_laboratorio": [
-    {"id": "p2022-programacion-g1", "curso_id": "p2022-programacion", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2022-seccion-1"},
-    {"id": "p2022-programacion-g2", "curso_id": "p2022-programacion", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2022-seccion-2"},
-    {"id": "p2022-programacion-g3", "curso_id": "p2022-programacion", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2022-seccion-3"},
-    {"id": "p2022-estructuras-g1", "curso_id": "p2022-estructuras", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2022-seccion-1"},
-    {"id": "p2022-estructuras-g2", "curso_id": "p2022-estructuras", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2022-seccion-2"},
-    {"id": "p2022-estructuras-g3", "curso_id": "p2022-estructuras", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2022-seccion-3"},
-    {"id": "p2022-bases-datos-g1", "curso_id": "p2022-bases-datos", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2022-seccion-1"},
-    {"id": "p2022-bases-datos-g2", "curso_id": "p2022-bases-datos", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2022-seccion-2"},
-    {"id": "p2022-bases-datos-g3", "curso_id": "p2022-bases-datos", "cohorte_id": "promocion-2022", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2022-seccion-3"},
-
-    {"id": "p2023-programacion-g1", "curso_id": "p2023-programacion", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2023-seccion-1"},
-    {"id": "p2023-programacion-g2", "curso_id": "p2023-programacion", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2023-seccion-2"},
-    {"id": "p2023-programacion-g3", "curso_id": "p2023-programacion", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2023-seccion-3"},
-    {"id": "p2023-estructuras-g1", "curso_id": "p2023-estructuras", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2023-seccion-1"},
-    {"id": "p2023-estructuras-g2", "curso_id": "p2023-estructuras", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2023-seccion-2"},
-    {"id": "p2023-estructuras-g3", "curso_id": "p2023-estructuras", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2023-seccion-3"},
-    {"id": "p2023-bases-datos-g1", "curso_id": "p2023-bases-datos", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2023-seccion-1"},
-    {"id": "p2023-bases-datos-g2", "curso_id": "p2023-bases-datos", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2023-seccion-2"},
-    {"id": "p2023-bases-datos-g3", "curso_id": "p2023-bases-datos", "cohorte_id": "promocion-2023", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2023-seccion-3"},
-
-    {"id": "p2024-programacion-g1", "curso_id": "p2024-programacion", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2024-seccion-1"},
-    {"id": "p2024-programacion-g2", "curso_id": "p2024-programacion", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2024-seccion-2"},
-    {"id": "p2024-programacion-g3", "curso_id": "p2024-programacion", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2024-seccion-3"},
-    {"id": "p2024-estructuras-g1", "curso_id": "p2024-estructuras", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2024-seccion-1"},
-    {"id": "p2024-estructuras-g2", "curso_id": "p2024-estructuras", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2024-seccion-2"},
-    {"id": "p2024-estructuras-g3", "curso_id": "p2024-estructuras", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2024-seccion-3"},
-    {"id": "p2024-bases-datos-g1", "curso_id": "p2024-bases-datos", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2024-seccion-1"},
-    {"id": "p2024-bases-datos-g2", "curso_id": "p2024-bases-datos", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2024-seccion-2"},
-    {"id": "p2024-bases-datos-g3", "curso_id": "p2024-bases-datos", "cohorte_id": "promocion-2024", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2024-seccion-3"},
-
-    {"id": "p2025-programacion-g1", "curso_id": "p2025-programacion", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2025-seccion-1"},
-    {"id": "p2025-programacion-g2", "curso_id": "p2025-programacion", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2025-seccion-2"},
-    {"id": "p2025-programacion-g3", "curso_id": "p2025-programacion", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2025-seccion-3"},
-    {"id": "p2025-estructuras-g1", "curso_id": "p2025-estructuras", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2025-seccion-1"},
-    {"id": "p2025-estructuras-g2", "curso_id": "p2025-estructuras", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2025-seccion-2"},
-    {"id": "p2025-estructuras-g3", "curso_id": "p2025-estructuras", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2025-seccion-3"},
-    {"id": "p2025-bases-datos-g1", "curso_id": "p2025-bases-datos", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2025-seccion-1"},
-    {"id": "p2025-bases-datos-g2", "curso_id": "p2025-bases-datos", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2025-seccion-2"},
-    {"id": "p2025-bases-datos-g3", "curso_id": "p2025-bases-datos", "cohorte_id": "promocion-2025", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2025-seccion-3"},
-
-    {"id": "p2026-programacion-g1", "curso_id": "p2026-programacion", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2026-seccion-1"},
-    {"id": "p2026-programacion-g2", "curso_id": "p2026-programacion", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2026-seccion-2"},
-    {"id": "p2026-programacion-g3", "curso_id": "p2026-programacion", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2026-seccion-3"},
-    {"id": "p2026-estructuras-g1", "curso_id": "p2026-estructuras", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2026-seccion-1"},
-    {"id": "p2026-estructuras-g2", "curso_id": "p2026-estructuras", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2026-seccion-2"},
-    {"id": "p2026-estructuras-g3", "curso_id": "p2026-estructuras", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2026-seccion-3"},
-    {"id": "p2026-bases-datos-g1", "curso_id": "p2026-bases-datos", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2026-seccion-1"},
-    {"id": "p2026-bases-datos-g2", "curso_id": "p2026-bases-datos", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 17, "subcohorte_id": "promocion-2026-seccion-2"},
-    {"id": "p2026-bases-datos-g3", "curso_id": "p2026-bases-datos", "cohorte_id": "promocion-2026", "cantidad_estudiantes": 16, "subcohorte_id": "promocion-2026-seccion-3"}
+    {
+      "id": "grupo-p2022-inteligentes-s1",
+      "curso_id": "p2022-inteligentes",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-1"
+    },
+    {
+      "id": "grupo-p2022-inteligentes-s2",
+      "curso_id": "p2022-inteligentes",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-2"
+    },
+    {
+      "id": "grupo-p2022-inteligentes-s3",
+      "curso_id": "p2022-inteligentes",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-3"
+    },
+    {
+      "id": "grupo-p2022-basedatos1-s1",
+      "curso_id": "p2022-basedatos1",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-1"
+    },
+    {
+      "id": "grupo-p2022-basedatos1-s2",
+      "curso_id": "p2022-basedatos1",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-2"
+    },
+    {
+      "id": "grupo-p2022-basedatos1-s3",
+      "curso_id": "p2022-basedatos1",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-3"
+    },
+    {
+      "id": "grupo-p2022-grafica-s1",
+      "curso_id": "p2022-grafica",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-1"
+    },
+    {
+      "id": "grupo-p2022-grafica-s2",
+      "curso_id": "p2022-grafica",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-2"
+    },
+    {
+      "id": "grupo-p2022-grafica-s3",
+      "curso_id": "p2022-grafica",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-3"
+    },
+    {
+      "id": "grupo-p2022-software-s1",
+      "curso_id": "p2022-software",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-1"
+    },
+    {
+      "id": "grupo-p2022-software-s2",
+      "curso_id": "p2022-software",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-2"
+    },
+    {
+      "id": "grupo-p2022-software-s3",
+      "curso_id": "p2022-software",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-3"
+    }
   ],
   "aulas": [
-    {"id": "lab-01", "capacidad": 20, "tipo": "laboratorio", "tiene_computadoras": true, "tiene_proyector_integrado": true},
-    {"id": "lab-02", "capacidad": 22, "tipo": "laboratorio", "tiene_computadoras": true, "tiene_proyector_integrado": false},
-    {"id": "lab-03", "capacidad": 24, "tipo": "laboratorio", "tiene_computadoras": true, "tiene_proyector_integrado": true},
-    {"id": "lab-04", "capacidad": 30, "tipo": "laboratorio", "tiene_computadoras": true, "tiene_proyector_integrado": true},
-    {"id": "lab-05", "capacidad": 36, "tipo": "laboratorio", "tiene_computadoras": true, "tiene_proyector_integrado": false},
-    {"id": "aula-101", "capacidad": 60, "tipo": "teoria", "tiene_proyector_integrado": true},
-    {"id": "aula-102", "capacidad": 65, "tipo": "teoria", "tiene_proyector_integrado": false},
-    {"id": "aula-103", "capacidad": 70, "tipo": "teoria", "tiene_proyector_integrado": true},
-    {"id": "aula-201", "capacidad": 75, "tipo": "teoria", "tiene_proyector_integrado": true},
-    {"id": "aula-202", "capacidad": 80, "tipo": "teoria", "tiene_proyector_integrado": false},
-    {"id": "aula-203", "capacidad": 85, "tipo": "teoria", "tiene_proyector_integrado": true},
-    {"id": "aula-301", "capacidad": 90, "tipo": "teoria", "tiene_proyector_integrado": true},
-    {"id": "aula-302", "capacidad": 100, "tipo": "teoria", "tiene_proyector_integrado": false}
-  ],
-  "sesiones_fijas": [
-    {"curso_id": "p2022-matematicas", "franja": {"dia": "lunes", "hora_inicio": "08:00", "hora_fin": "10:00"}, "aula_id": "aula-101"},
-    {"curso_id": "p2023-matematicas", "franja": {"dia": "martes", "hora_inicio": "08:00", "hora_fin": "10:00"}, "aula_id": "aula-102"},
-    {"curso_id": "p2024-matematicas", "franja": {"dia": "miercoles", "hora_inicio": "08:00", "hora_fin": "10:00"}, "aula_id": "aula-103"},
-    {"curso_id": "p2025-matematicas", "franja": {"dia": "jueves", "hora_inicio": "08:00", "hora_fin": "10:00"}, "aula_id": "aula-201"},
-    {"curso_id": "p2026-matematicas", "franja": {"dia": "viernes", "hora_inicio": "08:00", "hora_fin": "10:00"}, "aula_id": "aula-202"}
+    {
+      "id": "A101",
+      "capacidad": 30,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "A102",
+      "capacidad": 35,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "A103",
+      "capacidad": 40,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "A104",
+      "capacidad": 45,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "A105",
+      "capacidad": 50,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "A106",
+      "capacidad": 55,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "A107",
+      "capacidad": 60,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "B201",
+      "capacidad": 35,
+      "tipo": "laboratorio",
+      "tiene_proyector_integrado": true,
+      "tiene_computadoras": true
+    },
+    {
+      "id": "B202",
+      "capacidad": 40,
+      "tipo": "laboratorio",
+      "tiene_proyector_integrado": true,
+      "tiene_computadoras": true
+    },
+    {
+      "id": "B203",
+      "capacidad": 45,
+      "tipo": "laboratorio",
+      "tiene_proyector_integrado": true,
+      "tiene_computadoras": true
+    },
+    {
+      "id": "B204",
+      "capacidad": 50,
+      "tipo": "laboratorio",
+      "tiene_proyector_integrado": true,
+      "tiene_computadoras": true
+    },
+    {
+      "id": "B205",
+      "capacidad": 55,
+      "tipo": "laboratorio",
+      "tiene_proyector_integrado": true,
+      "tiene_computadoras": true
+    },
+    {
+      "id": "B206",
+      "capacidad": 60,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "B207",
+      "capacidad": 50,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "C101",
+      "capacidad": 30,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "C102",
+      "capacidad": 35,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "C103",
+      "capacidad": 40,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "C104",
+      "capacidad": 45,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "C105",
+      "capacidad": 50,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "C106",
+      "capacidad": 55,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    },
+    {
+      "id": "C107",
+      "capacidad": 60,
+      "tipo": "teoria",
+      "tiene_proyector_integrado": true
+    }
   ]
 }
