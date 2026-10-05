@@ -1,6 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from uuid import uuid4
 from config import FORMATO_HORA, PABELLON_A, PABELLON_B, PABELLON_C
 
 DatosAula = Dict[str, Any]
@@ -54,20 +55,140 @@ def get_room_by_id(room_id: str) -> Optional[DatosAula]:
     aula = _AULAS.get(room_id.upper())
     return deepcopy(aula) if aula is not None else None
 
-def is_room_available(room_id: str, start_time: str, end_time: str) -> bool:
+def _fecha_coincide(fecha_reserva, fecha_consulta) -> bool:
+    return (
+        fecha_reserva is None
+        or fecha_consulta is None
+        or str(fecha_reserva) == str(fecha_consulta)
+    )
+
+
+def is_room_available(
+    room_id: str,
+    start_time: str,
+    end_time: str,
+    fecha=None,
+    exclude_reservation_id: Optional[str] = None,
+) -> bool:
     aula = _AULAS.get(room_id.upper())
     if aula is None: return False
     for reserva in aula["reservas"]:
+        if reserva.get("id") == exclude_reservation_id:
+            continue
+        if not _fecha_coincide(reserva.get("fecha"), fecha):
+            continue
         if _horarios_se_superponen(start_time, end_time, reserva["horario_inicio"], reserva["horario_fin"]):
             return False
     return True
 
-def get_available_rooms(start_time: str, end_time: str) -> List[DatosAula]:
-    return [aula for aula in get_all_rooms() if is_room_available(aula["id"], start_time, end_time)]
 
-def add_reservation(room_id: str, start_time: str, end_time: str, materia: str) -> bool:
+def get_available_rooms(
+    start_time: str,
+    end_time: str,
+    fecha=None,
+    exclude_reservation_id: Optional[str] = None,
+    aforo_minimo: int = 0,
+    requiere_laboratorio: Optional[bool] = None,
+) -> List[DatosAula]:
+    aulas = [
+        aula for aula in get_all_rooms()
+        if aula["aforo_max"] >= aforo_minimo
+        and (
+            requiere_laboratorio is None
+            or (aula["tipo"] == "laboratorio" and aula["tiene_computadoras"])
+            if requiere_laboratorio
+            else requiere_laboratorio is None or aula["tipo"] == "teoria"
+        )
+        and is_room_available(
+            aula["id"], start_time, end_time, fecha, exclude_reservation_id
+        )
+    ]
+    return sorted(aulas, key=lambda aula: (aula["aforo_max"], aula["id"]))
+
+
+def add_reservation(
+    room_id: str,
+    start_time: str,
+    end_time: str,
+    materia: str,
+    fecha=None,
+    correo_docente: str = "",
+    aforo: int = 0,
+    facultad: str = "",
+    requiere_laboratorio: bool = False,
+) -> bool:
     aula = _AULAS.get(room_id.upper())
-    if aula is None or not is_room_available(room_id, start_time, end_time):
+    if aula is None or not is_room_available(room_id, start_time, end_time, fecha):
         return False
-    aula["reservas"].append({"horario_inicio": start_time, "horario_fin": end_time, "materia": materia.strip()})
+    aula["reservas"].append({
+        "id": uuid4().hex,
+        "fecha": str(fecha) if fecha else None,
+        "horario_inicio": start_time,
+        "horario_fin": end_time,
+        "materia": materia.strip(),
+        "correo_docente": correo_docente.strip().lower(),
+        "aforo": int(aforo or 0),
+        "facultad": facultad.strip(),
+        "requiere_laboratorio": bool(requiere_laboratorio),
+        "estado": "Confirmada",
+    })
+    return True
+
+
+def get_reservations_by_email(correo_docente: str) -> List[Dict[str, Any]]:
+    correo = correo_docente.strip().lower()
+    if not correo:
+        return []
+    reservas = []
+    for aula in _AULAS.values():
+        for reserva in aula["reservas"]:
+            if reserva.get("correo_docente", "").strip().lower() == correo:
+                reservas.append({**deepcopy(reserva), "aula": aula["id"]})
+    return sorted(
+        reservas,
+        key=lambda reserva: (
+            reserva.get("fecha") or "",
+            reserva.get("horario_inicio", ""),
+        ),
+    )
+
+
+def update_reservation(
+    reservation_id: str,
+    room_id: str,
+    start_time: str,
+    end_time: str,
+    fecha,
+) -> bool:
+    aula_destino = _AULAS.get(room_id.upper())
+    if aula_destino is None:
+        return False
+
+    reserva_actual = None
+    aula_actual = None
+    for aula in _AULAS.values():
+        for reserva in aula["reservas"]:
+            if reserva.get("id") == reservation_id:
+                reserva_actual = reserva
+                aula_actual = aula
+                break
+        if reserva_actual is not None:
+            break
+
+    if reserva_actual is None or aula_actual is None:
+        return False
+    if not is_room_available(
+        room_id, start_time, end_time, fecha, exclude_reservation_id=reservation_id
+    ):
+        return False
+
+    actualizada = {
+        **reserva_actual,
+        "fecha": str(fecha) if fecha else None,
+        "horario_inicio": start_time,
+        "horario_fin": end_time,
+        "estado": "Confirmada",
+    }
+    aula_actual["reservas"].remove(reserva_actual)
+    aula_destino["reservas"].append(actualizada)
     return True

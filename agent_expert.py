@@ -52,7 +52,7 @@ except ImportError:
     def get_all_rooms() -> List[Dict[str, Any]]:
         return list(MOCK_AULAS.values())
 
-    def is_room_available(room_id: str, start_time: str, end_time: str) -> bool:
+    def is_room_available(room_id: str, start_time: str, end_time: str, fecha=None, exclude_reservation_id=None) -> bool:
         """Mock de disponibilidad para pruebas aisladas."""
         return True
 
@@ -104,6 +104,7 @@ class AgenteExperto:
         # AgenteMonitor.procesar_solicitud.
         hora_inicio = hechos.get("horario_inicio", "")
         hora_fin = hechos.get("horario_fin", "")
+        fecha = hechos.get("fecha")
 
         # ----------------------------------------------------------------------
         # 1. PASO 1: Validación Física y de Capacidad en Base de Datos
@@ -165,6 +166,7 @@ class AgenteExperto:
                 room_id=aula_objetivo_id,
                 start_time=hora_inicio,
                 end_time=hora_fin,
+                fecha=fecha,
             )
             requiere_alternativa = not disponible
 
@@ -176,6 +178,7 @@ class AgenteExperto:
                 requiere_laboratorio=requiere_lab,
                 horario_inicio=hora_inicio,
                 horario_fin=hora_fin,
+                fecha=fecha,
             )
 
         # ----------------------------------------------------------------------
@@ -237,6 +240,7 @@ class AgenteExperto:
         requiere_laboratorio: bool,
         horario_inicio: str,
         horario_fin: str,
+        fecha=None,
     ) -> Optional[ResultadoAStar]:
         """Busca la alternativa factible de menor costo mediante A*."""
         return self._busqueda_a_star.buscar(
@@ -248,6 +252,7 @@ class AgenteExperto:
                 room_id=aula_id,
                 start_time=horario_inicio,
                 end_time=horario_fin,
+                fecha=fecha,
             ),
             excluir_ids=(aula_objetivo_id,),
         )

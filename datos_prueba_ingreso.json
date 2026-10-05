@@ -1,7 +1,7 @@
 {
   "configuracion": {
     "cursos_por_semestre": 6,
-    "cursos_con_laboratorio": 4,
+    "cursos_con_laboratorio": 0,
     "grupos_por_curso_laboratorio": 3,
     "cantidad_aulas_laboratorio": 5,
     "tamano_grupo_objetivo": 34,
@@ -49,142 +49,8 @@
       ]
     }
   ],
-  "cursos": [
-    {
-      "id": "p2022-inteligentes",
-      "nombre": "Sistemas Inteligentes",
-      "docente_id": "doc-1",
-      "cohorte_id": "cohorte-1",
-      "duracion_minutos": 120,
-      "requiere_laboratorio": true
-    },
-    {
-      "id": "p2022-algoritmos",
-      "nombre": "Algoritmos y Estructura de Datos",
-      "docente_id": "doc-1",
-      "cohorte_id": "cohorte-1",
-      "duracion_minutos": 240,
-      "requiere_laboratorio": false
-    },
-    {
-      "id": "p2022-sistemas",
-      "nombre": "Ingeniería de Sistemas",
-      "docente_id": "doc-1",
-      "cohorte_id": "cohorte-1",
-      "duracion_minutos": 120,
-      "requiere_laboratorio": false
-    },
-    {
-      "id": "p2022-basedatos1",
-      "nombre": "Base de Datos I",
-      "docente_id": "doc-1",
-      "cohorte_id": "cohorte-1",
-      "duracion_minutos": 180,
-      "requiere_laboratorio": true
-    },
-    {
-      "id": "p2022-grafica",
-      "nombre": "Ingeniería Gráfica",
-      "docente_id": "doc-1",
-      "cohorte_id": "cohorte-1",
-      "duracion_minutos": 120,
-      "requiere_laboratorio": true
-    },
-    {
-      "id": "p2022-software",
-      "nombre": "Ingeniería de Software",
-      "docente_id": "doc-1",
-      "cohorte_id": "cohorte-1",
-      "duracion_minutos": 120,
-      "requiere_laboratorio": true
-    }
-  ],
-  "grupos_laboratorio": [
-    {
-      "id": "grupo-p2022-inteligentes-s1",
-      "curso_id": "p2022-inteligentes",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-1"
-    },
-    {
-      "id": "grupo-p2022-inteligentes-s2",
-      "curso_id": "p2022-inteligentes",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-2"
-    },
-    {
-      "id": "grupo-p2022-inteligentes-s3",
-      "curso_id": "p2022-inteligentes",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-3"
-    },
-    {
-      "id": "grupo-p2022-basedatos1-s1",
-      "curso_id": "p2022-basedatos1",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-1"
-    },
-    {
-      "id": "grupo-p2022-basedatos1-s2",
-      "curso_id": "p2022-basedatos1",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-2"
-    },
-    {
-      "id": "grupo-p2022-basedatos1-s3",
-      "curso_id": "p2022-basedatos1",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-3"
-    },
-    {
-      "id": "grupo-p2022-grafica-s1",
-      "curso_id": "p2022-grafica",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-1"
-    },
-    {
-      "id": "grupo-p2022-grafica-s2",
-      "curso_id": "p2022-grafica",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-2"
-    },
-    {
-      "id": "grupo-p2022-grafica-s3",
-      "curso_id": "p2022-grafica",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-3"
-    },
-    {
-      "id": "grupo-p2022-software-s1",
-      "curso_id": "p2022-software",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-1"
-    },
-    {
-      "id": "grupo-p2022-software-s2",
-      "curso_id": "p2022-software",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-2"
-    },
-    {
-      "id": "grupo-p2022-software-s3",
-      "curso_id": "p2022-software",
-      "cohorte_id": "cohorte-1",
-      "cantidad_estudiantes": 15,
-      "subcohorte_id": "seccion-3"
-    }
-  ],
+  "cursos": [],
+  "grupos_laboratorio": [],
   "aulas": [
     {
       "id": "A101",
