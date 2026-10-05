@@ -146,7 +146,12 @@ class GeneradorHorarios:
         grupos = {grupo.id: grupo for grupo in datos.grupos_laboratorio}
         docentes = {docente.id: docente for docente in datos.docentes}
         candidatos = {
-            tarea.id: self._crear_candidatos(tarea, aulas, docentes)
+            tarea.id: self._crear_candidatos(
+                tarea,
+                aulas,
+                docentes,
+                datos.configuracion.tamano_grupo_objetivo,
+            )
             for tarea in tareas
         }
         tareas = tuple(
@@ -280,6 +285,14 @@ class GeneradorHorarios:
 
         for curso in datos.cursos:
             if curso.requiere_laboratorio:
+                if curso.duracion_laboratorio_minutos is not None:
+                    tareas.append(
+                        _Tarea(
+                            id=f"teoria:{curso.id}",
+                            curso=curso,
+                            grupo=None,
+                        )
+                    )
                 for grupo in datos.grupos_laboratorio:
                     if grupo.curso_id == curso.id and grupo.id not in grupos_fijos:
                         tareas.append(
@@ -301,6 +314,7 @@ class GeneradorHorarios:
         tarea: _Tarea,
         aulas: Dict[str, Aula],
         docentes: Dict[str, Docente],
+        estudiantes_totales: int = 0,
     ) -> Tuple[SesionProgramada, ...]:
         docente = docentes[tarea.curso.docente_id]
         if (
@@ -315,7 +329,12 @@ class GeneradorHorarios:
             if tarea.franja_fija is not None
             else _generar_franjas(
                 docente.disponibilidad,
-                tarea.curso.duracion_minutos,
+                (
+                    tarea.curso.duracion_laboratorio_minutos
+                    if tarea.grupo is not None
+                    and tarea.curso.duracion_laboratorio_minutos is not None
+                    else tarea.curso.duracion_minutos
+                ),
                 self.intervalo_inicio_minutos,
             )
         )
@@ -329,7 +348,10 @@ class GeneradorHorarios:
             )
         else:
             aulas_compatibles = tuple(
-                aula for aula in aulas.values() if aula.tipo == TipoAula.TEORIA
+                aula
+                for aula in aulas.values()
+                if aula.tipo == TipoAula.TEORIA
+                and aula.capacidad >= estudiantes_totales
             )
 
         if tarea.aula_fija is not None:

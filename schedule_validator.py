@@ -80,6 +80,7 @@ class ValidadorHorario:
         )
         por_grupo: Dict[str, List[SesionProgramada]] = {}
         cursos_presentes = set()
+        cursos_teoria_presentes = set()
 
         for sesion in sesiones_validas:
             curso = cursos.get(sesion.curso_id)
@@ -114,12 +115,18 @@ class ValidadorHorario:
                     )
                 )
 
-            if sesion.franja.duracion_minutos != curso.duracion_minutos:
+            duracion_esperada = (
+                curso.duracion_laboratorio_minutos
+                if sesion.grupo_laboratorio_id is not None
+                and curso.duracion_laboratorio_minutos is not None
+                else curso.duracion_minutos
+            )
+            if sesion.franja.duracion_minutos != duracion_esperada:
                 incidencias.append(
                     IncidenciaHorario(
                         "duracion_incorrecta",
                         f"La duración de la sesión {sesion.id} no coincide con la "
-                        f"duración de {curso.id} ({curso.duracion_minutos} minutos).",
+                        f"duración esperada de {curso.id} ({duracion_esperada} minutos).",
                         (sesion.id,),
                     )
                 )
@@ -158,8 +165,14 @@ class ValidadorHorario:
                     )
                 else:
                     por_grupo.setdefault(grupo.id, []).append(sesion)
+            elif curso.duracion_laboratorio_minutos is not None:
+                cursos_teoria_presentes.add(curso.id)
 
-            if curso.requiere_laboratorio and grupo is None:
+            if (
+                curso.requiere_laboratorio
+                and grupo is None
+                and curso.duracion_laboratorio_minutos is None
+            ):
                 incidencias.append(
                     IncidenciaHorario(
                         "falta_grupo_laboratorio",
@@ -176,7 +189,7 @@ class ValidadorHorario:
                     )
                 )
 
-            if curso.requiere_laboratorio and aula is not None:
+            if curso.requiere_laboratorio and grupo is not None and aula is not None:
                 if aula.tipo != TipoAula.LABORATORIO or not aula.tiene_computadoras:
                     incidencias.append(
                         IncidenciaHorario(
@@ -193,12 +206,24 @@ class ValidadorHorario:
                             (sesion.id,),
                         )
                     )
-            elif not curso.requiere_laboratorio and aula is not None:
+            elif (
+                (not curso.requiere_laboratorio or grupo is None)
+                and aula is not None
+            ):
                 if aula.tipo != TipoAula.TEORIA:
                     incidencias.append(
                         IncidenciaHorario(
                             "aula_no_apta_para_teoria",
                             f"El aula {aula.id} no es un aula de teoría.",
+                            (sesion.id,),
+                        )
+                    )
+                if aula.capacidad < datos.configuracion.tamano_grupo_objetivo:
+                    incidencias.append(
+                        IncidenciaHorario(
+                            "capacidad_teoria_insuficiente",
+                            f"El aula {aula.id} no tiene capacidad para los "
+                            f"{datos.configuracion.tamano_grupo_objetivo} estudiantes del ciclo.",
                             (sesion.id,),
                         )
                     )
@@ -209,6 +234,16 @@ class ValidadorHorario:
                     IncidenciaHorario(
                         "curso_sin_programar",
                         f"El curso {curso.id} no tiene sesiones programadas.",
+                    )
+                )
+            if (
+                curso.duracion_laboratorio_minutos is not None
+                and curso.id not in cursos_teoria_presentes
+            ):
+                incidencias.append(
+                    IncidenciaHorario(
+                        "curso_sin_sesion_teorica",
+                        f"El curso {curso.id} requiere su sesión teórica para toda la matrícula.",
                     )
                 )
 

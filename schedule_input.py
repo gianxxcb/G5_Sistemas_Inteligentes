@@ -161,7 +161,7 @@ def _crear_curso(valor: Any, ruta: str) -> Curso:
             "cohorte_id",
             "duracion_minutos",
         ),
-        opcionales=("requiere_laboratorio",),
+        opcionales=("requiere_laboratorio", "duracion_laboratorio_minutos"),
     )
     try:
         return Curso(
@@ -171,6 +171,7 @@ def _crear_curso(valor: Any, ruta: str) -> Curso:
             cohorte_id=_texto(objeto["cohorte_id"], f"{ruta}.cohorte_id"),
             duracion_minutos=objeto["duracion_minutos"],
             requiere_laboratorio=objeto.get("requiere_laboratorio", False),
+            duracion_laboratorio_minutos=objeto.get("duracion_laboratorio_minutos"),
         )
     except ErrorModeloPlanificacion as error:
         raise ErrorEntradaPlanificacion(f"{ruta}: {error}") from error

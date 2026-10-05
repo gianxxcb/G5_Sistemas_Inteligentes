@@ -162,12 +162,14 @@ class AgenteExperto:
         else:
             # Consultar disponibilidad usando los horarios normalizados por
             # AgenteMonitor y la función pública de database.py.
-            disponible = is_room_available(
-                room_id=aula_objetivo_id,
-                start_time=hora_inicio,
-                end_time=hora_fin,
-                fecha=fecha,
-            )
+            argumentos_disponibilidad = {
+                "room_id": aula_objetivo_id,
+                "start_time": hora_inicio,
+                "end_time": hora_fin,
+            }
+            if fecha is not None:
+                argumentos_disponibilidad["fecha"] = fecha
+            disponible = is_room_available(**argumentos_disponibilidad)
             requiere_alternativa = not disponible
 
         alternativa = None
@@ -252,7 +254,7 @@ class AgenteExperto:
                 room_id=aula_id,
                 start_time=horario_inicio,
                 end_time=horario_fin,
-                fecha=fecha,
+                **({"fecha": fecha} if fecha is not None else {}),
             ),
             excluir_ids=(aula_objetivo_id,),
         )

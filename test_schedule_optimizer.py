@@ -154,6 +154,51 @@ class GeneradorHorariosTests(unittest.TestCase):
                     self.assertEqual(sesion.franja.dia, DiaSemana.LUNES)
                     self.assertEqual(sesion.franja.hora_inicio, "09:00")
 
+    def test_curso_con_practica_programa_teoria_y_todos_los_grupos(self) -> None:
+        datos_base = crear_datos_planificables()
+        curso_laboratorio = Curso(
+            "lab",
+            "Laboratorio",
+            "doc-lab",
+            "cohorte",
+            120,
+            True,
+            duracion_laboratorio_minutos=60,
+        )
+        aulas = datos_base.aulas + (Aula("teoria-pequena", 40, TipoAula.TEORIA),)
+        datos = DatosPlanificacion(
+            docentes=datos_base.docentes,
+            cursos=(curso_laboratorio, datos_base.cursos[1]),
+            aulas=aulas,
+            grupos_laboratorio=datos_base.grupos_laboratorio,
+            sesiones_fijas=datos_base.sesiones_fijas,
+            configuracion=datos_base.configuracion,
+        )
+
+        resultado = GeneradorHorarios(max_estados=5000).generar(datos)
+
+        self.assertGreaterEqual(len(resultado.horarios), 1)
+        for horario in resultado.horarios:
+            sesiones_curso = [
+                sesion for sesion in horario.sesiones if sesion.curso_id == "lab"
+            ]
+            sesiones_teoria = [
+                sesion for sesion in sesiones_curso
+                if sesion.grupo_laboratorio_id is None
+            ]
+            sesiones_practica = [
+                sesion for sesion in sesiones_curso
+                if sesion.grupo_laboratorio_id is not None
+            ]
+            self.assertEqual(len(sesiones_teoria), 1)
+            self.assertEqual(len(sesiones_practica), 3)
+            self.assertGreaterEqual(
+                next(aula.capacidad for aula in datos.aulas if aula.id == sesiones_teoria[0].aula_id),
+                datos.configuracion.tamano_grupo_objetivo,
+            )
+            self.assertNotEqual(sesiones_teoria[0].aula_id, "teoria-pequena")
+            self.assertTrue(ValidadorHorario().validar(datos, horario.sesiones).valido)
+
     def test_puntuador_resta_huecos_y_aplica_objetivo_de_dias(self) -> None:
         datos = crear_datos_planificables()
         resultado = GeneradorHorarios(max_estados=3000).generar(datos)

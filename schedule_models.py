@@ -114,6 +114,7 @@ class Curso:
     cohorte_id: str
     duracion_minutos: int
     requiere_laboratorio: bool = False
+    duracion_laboratorio_minutos: Optional[int] = None
 
     def __post_init__(self) -> None:
         for campo in ("id", "nombre", "docente_id", "cohorte_id"):
@@ -128,6 +129,19 @@ class Curso:
             )
         if not isinstance(self.requiere_laboratorio, bool):
             raise ErrorModeloPlanificacion("requiere_laboratorio debe ser booleano.")
+        duracion_laboratorio = self.duracion_laboratorio_minutos
+        if duracion_laboratorio is not None and (
+            isinstance(duracion_laboratorio, bool)
+            or not isinstance(duracion_laboratorio, int)
+            or duracion_laboratorio <= 0
+        ):
+            raise ErrorModeloPlanificacion(
+                "duracion_laboratorio_minutos debe ser un entero positivo o null."
+            )
+        if duracion_laboratorio is not None and not self.requiere_laboratorio:
+            raise ErrorModeloPlanificacion(
+                "Un curso sin laboratorio no puede tener duracion_laboratorio_minutos."
+            )
 
 
 @dataclass(frozen=True)

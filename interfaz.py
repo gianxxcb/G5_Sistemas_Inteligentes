@@ -1,5 +1,6 @@
 # --- MÓDULO INTERFAZ SIAH-UNT ---
 import sys
+import importlib
 from copy import deepcopy
 from pathlib import Path
 import ipywidgets as widgets
@@ -20,13 +21,30 @@ if carpeta_proyecto.exists() and str(carpeta_proyecto) not in sys.path:
 elif str(Path.cwd()) not in sys.path:
     sys.path.append(str(Path.cwd()))
 
+BACKEND_ERROR = None
+RESERVATION_API_ACTUALIZADA = False
+
 try:
-    from database import (
-        get_all_rooms, get_available_rooms, is_room_available, add_reservation,
-        get_reservations_by_email, update_reservation,
+    import database as database_module
+    database_module = importlib.reload(database_module)
+    get_all_rooms = database_module.get_all_rooms
+    get_available_rooms = database_module.get_available_rooms
+    is_room_available = database_module.is_room_available
+    add_reservation = database_module.add_reservation
+    RESERVATION_API_ACTUALIZADA = all(
+        hasattr(database_module, nombre)
+        for nombre in ("get_reservations_by_email", "update_reservation")
+    )
+    get_reservations_by_email = getattr(
+        database_module, "get_reservations_by_email", lambda correo: []
+    )
+    update_reservation = getattr(
+        database_module, "update_reservation", lambda *args, **kwargs: False
     )
     from config import COORDENADAS_FACULTADES
-    from agent_expert import AgenteExperto
+    import agent_expert as agent_expert_module
+    agent_expert_module = importlib.reload(agent_expert_module)
+    AgenteExperto = agent_expert_module.AgenteExperto
     from schedule_models import (
         DatosPlanificacion, ConfiguracionPlanificacion, Curso, 
         Docente, Aula, TipoAula, FranjaSemanal, DiaSemana, GrupoLaboratorio
@@ -34,8 +52,9 @@ try:
     from schedule_optimizer import GeneradorHorarios
     from schedule_input import cargar_datos_planificacion, datos_planificacion_desde_dict
     BACKEND_DISPONIBLE = True
-except ImportError as e:
+except (ImportError, AttributeError) as e:
     BACKEND_DISPONIBLE = False
+    BACKEND_ERROR = f"{type(e).__name__}: {e}"
 
 WEBHOOK_N8N_URL = "https://acorn-pushiness-authentic.ngrok-free.dev/webhook/40e725c6-cc5d-4dbb-81e4-0f9cb91277c3"
 
@@ -58,7 +77,8 @@ def cargar_catalogo_json():
                     "docente_id": c.get("docente_id", ""),
                     "horas_teoria": int(c.get("duracion_minutos", 120) / 60),
                     "requiere_lab": c.get("requiere_laboratorio", False),
-                    "horas_lab": 2 if c.get("requiere_laboratorio", False) else 0
+                    "horas_lab": int(c.get("duracion_laboratorio_minutos", 120) / 60)
+                    if c.get("requiere_laboratorio", False) else 0
                 })
     return cat
 
@@ -107,82 +127,227 @@ def _guardar_horarios_guardados(horarios):
         encoding="utf-8",
     )
 
+
+def _aula_disponible(room_id, start_time, end_time, fecha=None, exclude_reservation_id=None):
+    if RESERVATION_API_ACTUALIZADA:
+        return is_room_available(
+            room_id, start_time, end_time, fecha=fecha,
+            exclude_reservation_id=exclude_reservation_id,
+        )
+    return is_room_available(room_id, start_time, end_time)
+
+
+def _aulas_disponibles(
+    start_time, end_time, fecha=None, exclude_reservation_id=None,
+    aforo_minimo=0, requiere_laboratorio=None,
+):
+    if RESERVATION_API_ACTUALIZADA:
+        return get_available_rooms(
+            start_time, end_time, fecha=fecha,
+            exclude_reservation_id=exclude_reservation_id,
+            aforo_minimo=aforo_minimo,
+            requiere_laboratorio=requiere_laboratorio,
+        )
+    aulas = get_available_rooms(start_time, end_time)
+    return [
+        aula for aula in aulas
+        if aula.get("aforo_max", 0) >= aforo_minimo
+        and (
+            requiere_laboratorio is None
+            or (
+                aula.get("tipo") == "laboratorio"
+                and aula.get("tiene_computadoras", False)
+                if requiere_laboratorio
+                else aula.get("tipo") == "teoria"
+            )
+        )
+    ]
+
+
+def _registrar_reserva(
+    room_id, start_time, end_time, materia, fecha, correo_docente,
+    aforo, facultad, requiere_laboratorio,
+):
+    if RESERVATION_API_ACTUALIZADA:
+        return add_reservation(
+            room_id, start_time, end_time, materia, fecha=fecha,
+            correo_docente=correo_docente, aforo=aforo,
+            facultad=facultad, requiere_laboratorio=requiere_laboratorio,
+        )
+    return add_reservation(room_id, start_time, end_time, materia)
+
+
+def _correo_unitru_valido(correo):
+    correo = correo.strip().lower()
+    return bool(correo.split("@", 1)[0]) and correo.endswith("@unitru.edu.pe")
+
 style = {'description_width': '170px'}
 layout_campo = widgets.Layout(width='620px', margin='6px 0px')
 
-def exportar_excel_matricial(resultado_horarios, max_alternativas, ruta_salida="HORARIO_2026_II_GENERADO.xlsx"):
+def exportar_excel_matricial(
+    resultado_horarios,
+    max_alternativas,
+    ruta_salida="HORARIO_2026_II_GENERADO.xlsx",
+    cursos=None,
+    docentes=None,
+    ciclo="",
+    total_estudiantes=0,
+):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
-    
+    cursos = cursos or []
+    docentes = {docente["id"]: docente["nombre"] for docente in (docentes or [])}
+    dias_semana = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO"]
     franjas_horas = [
-        ("07:00", "08:00"), ("08:00", "09:00"), ("09:00", "10:00"),
-        ("10:00", "11:00"), ("11:00", "12:00"), ("12:00", "13:00"),
-        ("13:00", "14:00"), ("14:00", "15:00"), ("15:00", "16:00"),
-        ("16:00", "17:00"), ("17:00", "18:00"), ("18:00", "19:00"),
-        ("19:00", "20:00"), ("20:00", "21:00")
+        (f"{hora:02d}:00", f"{hora + 1:02d}:00")
+        for hora in range(7, 22)
     ]
-    
-    dias_semana = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES"]
+    paleta = ["C9E3F5", "FFE0B2", "D9EAD3", "E4C1F9", "F8D7DA", "D0F4EA", "FFF2B2"]
+    relleno_encabezado = PatternFill("solid", fgColor="173F5F")
+    relleno_hora = PatternFill("solid", fgColor="E8EEF2")
+    borde = Border(
+        left=Side(style="thin", color="8899A6"),
+        right=Side(style="thin", color="8899A6"),
+        top=Side(style="thin", color="8899A6"),
+        bottom=Side(style="thin", color="8899A6"),
+    )
 
-    border_thin = Border(left=Side(style='thin', color='D9D9D9'),
-                         right=Side(style='thin', color='D9D9D9'),
-                         top=Side(style='thin', color='D9D9D9'),
-                         bottom=Side(style='thin', color='D9D9D9'))
-    
-    fill_header = PatternFill(start_color="1D4ED8", end_color="1D4ED8", fill_type="solid")
-    font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
-    
-    fill_hora = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
-    font_hora = Font(name="Calibri", size=10, bold=True, color="334155")
-    
-    fill_curso = PatternFill(start_color="E0F2FE", end_color="E0F2FE", fill_type="solid")
-    font_curso = Font(name="Calibri", size=9, bold=True, color="0369A1")
+    for alternativa, horario in enumerate(resultado_horarios[:max_alternativas], 1):
+        ws = wb.create_sheet(title=f"Horario {alternativa}")
+        ws.merge_cells("A1:H1")
+        ws["A1"] = "UNIVERSIDAD NACIONAL DE TRUJILLO · FACULTAD DE INGENIERIA"
+        ws["A1"].font = Font(name="Arial Narrow", size=14, bold=True, color="173F5F")
+        ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+        ws.merge_cells("A2:H2")
+        ws["A2"] = f"ESCUELA PROFESIONAL · CICLO {ciclo} · HORARIO ACADEMICO"
+        ws["A2"].font = Font(name="Arial Narrow", size=12, bold=True, color="173F5F")
+        ws["A2"].alignment = Alignment(horizontal="center")
+        ws["A3"] = "MATRICULA TOTAL"
+        ws["B3"] = total_estudiantes
+        ws["D3"] = "ALTERNATIVA"
+        ws["E3"] = alternativa
+        for celda in (ws["A3"], ws["D3"]):
+            celda.font = Font(bold=True, color="173F5F")
 
-    for idx, h in enumerate(resultado_horarios[:max_alternativas], 1):
-        ws = wb.create_sheet(title=f"Opcion {idx}")
-        
-        ws.cell(row=1, column=1, value="HORA").fill = fill_header
-        ws.cell(row=1, column=1).font = font_header
-        ws.cell(row=1, column=1).alignment = Alignment(horizontal="center", vertical="center")
-        
-        for col_idx, dia in enumerate(dias_semana, start=2):
-            cell = ws.cell(row=1, column=col_idx, value=dia)
-            cell.fill = fill_header
-            cell.font = font_header
-            cell.alignment = Alignment(horizontal="center", vertical="center")
+        encabezados = ["N°", "DOCENTE", "ASIGNATURA", "TEORIA (h)", "PRACTICA (h)", "GRUPOS", "LAB.", "TOTAL (h)"]
+        for columna, titulo in enumerate(encabezados, 1):
+            celda = ws.cell(row=5, column=columna, value=titulo)
+            celda.fill = relleno_encabezado
+            celda.font = Font(bold=True, color="FFFFFF", size=9)
+            celda.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            celda.border = borde
 
-        for row_idx, (h_i, h_f) in enumerate(franjas_horas, start=2):
-            cell_h = ws.cell(row=row_idx, column=1, value=f"{h_i} - {h_f}")
-            cell_h.fill = fill_hora
-            cell_h.font = font_hora
-            cell_h.alignment = Alignment(horizontal="center", vertical="center")
-            
-            for col_idx in range(2, 7):
-                c = ws.cell(row=row_idx, column=col_idx)
-                c.border = border_thin
+        sesiones_por_curso = {}
+        for sesion in horario.sesiones:
+            sesiones_por_curso.setdefault(sesion.curso_id, []).append(sesion)
+        cursos_por_id = {curso["id"]: curso for curso in cursos}
+        for numero, curso in enumerate(cursos, 1):
+            sesiones_curso = sesiones_por_curso.get(curso["id"], [])
+            cantidad_grupos = len({
+                sesion.grupo_laboratorio_id
+                for sesion in sesiones_curso
+                if sesion.grupo_laboratorio_id
+            })
+            teoria = int(curso.get("duracion_minutos", 0) / 60)
+            practica = int(curso.get("duracion_laboratorio_minutos") or 0) // 60
+            valores = [
+                numero,
+                docentes.get(curso.get("docente_id"), curso.get("docente_id", "")),
+                curso.get("nombre", curso["id"]),
+                teoria,
+                practica,
+                cantidad_grupos,
+                "SI" if curso.get("requiere_laboratorio") else "NO",
+                teoria + practica,
+            ]
+            fila = 5 + numero
+            for columna, valor in enumerate(valores, 1):
+                celda = ws.cell(row=fila, column=columna, value=valor)
+                celda.border = borde
+                celda.alignment = Alignment(
+                    horizontal="left" if columna in (2, 3) else "center",
+                    vertical="center",
+                    wrap_text=True,
+                )
+                if columna == 3:
+                    celda.fill = PatternFill("solid", fgColor=paleta[(numero - 1) % len(paleta)])
 
-        for sesion in h.sesiones:
-            dia_str = sesion.franja.dia.value.upper()
-            if dia_str in dias_semana:
-                col_i = dias_semana.index(dia_str) + 2
-                h_inicio_s = sesion.franja.hora_inicio
-                
-                for r_i, (h_i, h_f) in enumerate(franjas_horas, start=2):
-                    if h_i == h_inicio_s or (h_i <= h_inicio_s < h_f):
-                        cell_target = ws.cell(row=r_i, column=col_i)
-                        
-                        tipo_txt = "LAB" if "grupo" in str(sesion.grupo_laboratorio_id or "").lower() else "Teoria"
-                        val_actual = cell_target.value
-                        nuevo_val = f"{sesion.curso_id.replace('p2022-', '').upper()}\n{tipo_txt} - ({sesion.aula_id})"
-                        
-                        cell_target.value = f"{val_actual}\n---\n{nuevo_val}" if val_actual else nuevo_val
-                        cell_target.fill = fill_curso
-                        cell_target.font = font_curso
-                        cell_target.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        fila_horario = max(13, 7 + len(cursos) + 1)
+        for columna, titulo in enumerate(["HORA", *dias_semana, "HORA"], 1):
+            celda = ws.cell(row=fila_horario, column=columna, value=titulo)
+            celda.fill = relleno_encabezado
+            celda.font = Font(bold=True, color="FFFFFF", size=10)
+            celda.alignment = Alignment(horizontal="center", vertical="center")
+            celda.border = borde
 
-        ws.column_dimensions['A'].width = 16
-        for col_letter in ['B', 'C', 'D', 'E', 'F']:
-            ws.column_dimensions[col_letter].width = 28
+        minutos_a_fila = {}
+        for indice, (hora_inicio, hora_fin) in enumerate(franjas_horas, 1):
+            fila = fila_horario + indice
+            minutos_a_fila[hora_inicio] = fila
+            for columna in (1, 8):
+                celda = ws.cell(row=fila, column=columna, value=f"{hora_inicio} - {hora_fin}")
+                celda.fill = relleno_hora
+                celda.font = Font(bold=True, size=9)
+                celda.alignment = Alignment(horizontal="center", vertical="center")
+                celda.border = borde
+            for columna in range(2, 8):
+                ws.cell(row=fila, column=columna).border = borde
+                ws.cell(row=fila, column=columna).alignment = Alignment(
+                    horizontal="center", vertical="center", wrap_text=True
+                )
+            ws.row_dimensions[fila].height = 32
+
+        for sesion in horario.sesiones:
+            dia = sesion.franja.dia.value.upper()
+            if dia not in dias_semana:
+                continue
+            columna = dias_semana.index(dia) + 2
+            inicio = datetime.strptime(sesion.franja.hora_inicio, "%H:%M")
+            fin = datetime.strptime(sesion.franja.hora_fin, "%H:%M")
+            inicio_minutos = inicio.hour * 60 + inicio.minute
+            fin_minutos = fin.hour * 60 + fin.minute
+            etiqueta_inicio = inicio.strftime("%H:%M")
+            fila_inicio = minutos_a_fila.get(f"{inicio.hour:02d}:00")
+            if fila_inicio is None:
+                continue
+            curso = cursos_por_id.get(sesion.curso_id, {})
+            nombre = curso.get("nombre", sesion.curso_id)
+            docente = docentes.get(curso.get("docente_id"), "")
+            grupo = sesion.grupo_laboratorio_id
+            tipo = f"PRACTICA · {grupo}" if grupo else "TEORIA · grupo completo"
+            detalle = (
+                f"{nombre}\n{tipo}\n{etiqueta_inicio}-{sesion.franja.hora_fin}\n"
+                f"Aula {sesion.aula_id}"
+            )
+            if docente:
+                detalle += f"\n{docente}"
+            for indice, (hora_inicio, hora_fin) in enumerate(franjas_horas, 1):
+                slot_inicio = indice * 60 + 6 * 60
+                slot_fin = slot_inicio + 60
+                if inicio_minutos < slot_fin and slot_inicio < fin_minutos:
+                    celda = ws.cell(row=fila_horario + indice, column=columna)
+                    existentes = celda.value
+                    texto = detalle if slot_inicio <= inicio_minutos < slot_fin else f"{nombre}\n(continua)"
+                    celda.value = f"{existentes}\n\n{texto}" if existentes else texto
+                    celda.fill = PatternFill(
+                        "solid", fgColor=paleta[(list(cursos_por_id).index(sesion.curso_id)) % len(paleta)]
+                    )
+                    celda.font = Font(name="Arial Narrow", size=8, bold=True, color="243746")
+                    celda.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                    celda.border = borde
+
+        anchos = {"A": 14, "B": 25, "C": 31, "D": 12, "E": 14, "F": 10, "G": 9, "H": 14}
+        for letra, ancho in anchos.items():
+            ws.column_dimensions[letra].width = ancho
+        for columna in range(2, 8):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(columna)].width = 22
+        ws.freeze_panes = f"B{fila_horario + 1}"
+        ws.sheet_view.showGridLines = False
+        ws.page_setup.orientation = "landscape"
+        ws.page_setup.fitToWidth = 1
+        ws.page_setup.fitToHeight = 0
+        ws.sheet_properties.pageSetUpPr.fitToPage = True
+        ws.print_title_rows = f"1:{fila_horario}"
 
     wb.save(ruta_salida)
     return ruta_salida
@@ -309,6 +474,15 @@ def iniciar_interfaz():
             if not correo:
                 print("Escribe el correo del docente para consultar sus reservas.")
                 return
+            if not _correo_unitru_valido(correo):
+                print("El correo debe terminar en @unitru.edu.pe.")
+                return
+            if not RESERVATION_API_ACTUALIZADA:
+                print(
+                    "El backend cargado en Colab no incluye la consulta de reservas por docente. "
+                    "Carga el database.py actualizado y vuelve a ejecutar la celda de interfaz."
+                )
+                return
             reservas = get_reservations_by_email(correo)
             if not reservas:
                 display(widgets.HTML(
@@ -389,7 +563,7 @@ def iniciar_interfaz():
             opciones = []
 
             def agregar_opciones(hora_inicio, hora_fin):
-                aulas = get_available_rooms(
+                aulas = _aulas_disponibles(
                     hora_inicio, hora_fin, fecha=fecha_nueva,
                     exclude_reservation_id=reserva["id"],
                     aforo_minimo=reserva.get("aforo", 0),
@@ -481,6 +655,10 @@ def iniciar_interfaz():
     def confirmar_cambio_aceptado(b):
         reserva = reserva_seleccionada["reserva"]
         indice = opcion_cambio_select.value
+        if not RESERVATION_API_ACTUALIZADA:
+            with output_opciones_cambio:
+                print("Carga el database.py actualizado antes de modificar reservas.")
+            return
         if reserva is None or indice == '':
             with output_opciones_cambio:
                 print("Selecciona la opción que el docente aceptó.")
@@ -536,9 +714,9 @@ def iniciar_interfaz():
                 or not h_ini_reserva.value
                 or not h_fin_reserva.value
                 or not fecha_reserva_picker.value
-                or not correo_docente_input.value.strip()
+                or not _correo_unitru_valido(correo_docente_input.value)
             ):
-                print("Por favor completa todos los campos obligatorios.")
+                print("Completa todos los campos y usa un correo terminado en @unitru.edu.pe.")
                 return
 
             experto = AgenteExperto()
@@ -571,14 +749,14 @@ def iniciar_interfaz():
             estrategia_asignacion = ""
             r_disponibilidad_cumplida = False
 
-            if aprobado_experto and aula_preferida and is_room_available(
+            if aprobado_experto and aula_preferida and _aula_disponible(
                 aula_preferida, h_ini, h_fin, fecha=fecha_reserva
             ):
                 aula_final = aula_preferida
                 r_disponibilidad_cumplida = True
                 estrategia_asignacion = f"Aula asignada por regla experta ({regla_id})."
             elif aprobado_experto:
-                candidatas = get_available_rooms(
+                candidatas = _aulas_disponibles(
                     h_ini, h_fin, fecha=fecha_reserva,
                     aforo_minimo=aforo_solicitado,
                     requiere_laboratorio=requiere_lab,
@@ -594,11 +772,10 @@ def iniciar_interfaz():
 
             aprobado_final = False
             if aula_final and r_disponibilidad_cumplida:
-                if add_reservation(
+                if _registrar_reserva(
                     aula_final, h_ini, h_fin, materia_reserva_select.value,
-                    fecha=fecha_reserva, correo_docente=correo_docente,
-                    aforo=aforo_solicitado, facultad=facultad,
-                    requiere_laboratorio=requiere_lab,
+                    fecha_reserva, correo_docente, aforo_solicitado,
+                    facultad, requiere_lab,
                 ):
                     aprobado_final = True
 
@@ -801,6 +978,9 @@ def iniciar_interfaz():
             if not nombre or nuevo_horas_teoria.value == '' or nuevo_req_lab_select.value == '':
                 print("Completa los campos obligatorios del curso.")
                 return
+            if nuevo_req_lab_select.value == 'Sí' and nuevo_horas_lab.value == '':
+                print("Selecciona cuántas horas prácticas requiere el curso.")
+                return
             if modo_formulario_curso["modo"] == "modificar" and not modo_formulario_curso["curso_id"]:
                 print("Selecciona el curso que deseas modificar.")
                 return
@@ -852,6 +1032,9 @@ def iniciar_interfaz():
                         "docente_id": docente_id,
                         "duracion_minutos": int(nuevo_horas_teoria.value) * 60,
                         "requiere_laboratorio": req_l,
+                        "duracion_laboratorio_minutos": (
+                            int(nuevo_horas_lab.value) * 60 if req_l else None
+                        ),
                     })
                     d_json["grupos_laboratorio"] = [
                         grupo for grupo in d_json.get("grupos_laboratorio", [])
@@ -865,6 +1048,9 @@ def iniciar_interfaz():
                         "cohorte_id": "cohorte-1",
                         "duracion_minutos": int(nuevo_horas_teoria.value) * 60,
                         "requiere_laboratorio": req_l,
+                        "duracion_laboratorio_minutos": (
+                            int(nuevo_horas_lab.value) * 60 if req_l else None
+                        ),
                     })
                 if req_l:
                     grupos_existentes = d_json.setdefault("grupos_laboratorio", [])
@@ -906,14 +1092,25 @@ def iniciar_interfaz():
     def on_generar_horarios_clicked(b):
         with output_generacion:
             output_generacion.clear_output(wait=True)
-            if not BACKEND_DISPONIBLE:
-                print("Backend no disponible.")
-                return
-            
             cursos_sel = [catalogo_cursos[i] for i, chk in enumerate(checkbox_list) if chk.value]
             ciclo = ciclo_generacion_select.value
+            estudiantes_valor = estudiantes_ciclo_select.value
+            total_est = int(estudiantes_valor) if estudiantes_valor != '' else None
+            r_6_cursos = len(cursos_sel) >= 6
+            r_minimo_estudiantes = total_est is not None and total_est >= 16
+            if not BACKEND_DISPONIBLE:
+                display(widgets.HTML(f"""
+                <div style="background:#fff7ed;border-left:5px solid #c2410c;padding:14px;margin:12px 0;font-family:sans-serif">
+                  <h4 style="margin-top:0">Auditoría previa · Ciclo {html.escape(ciclo)}</h4>
+                  <p><b>Mínimo de cursos (6):</b> {'Cumplida' if r_6_cursos else 'No cumplida'} · {len(cursos_sel)} seleccionados.</p>
+                  <p><b>Matrícula mínima (16):</b> {'Cumplida' if r_minimo_estudiantes else 'No cumplida'} · {total_est if total_est is not None else 'sin seleccionar'}.</p>
+                  <p><b>Reglas del agente experto:</b> No evaluadas porque no se pudo cargar el backend.</p>
+                  <p><b>Detalle:</b> {html.escape(BACKEND_ERROR or 'Error de importación desconocido.')}</p>
+                  <p>Recarga los módulos del proyecto en Colab y vuelve a ejecutar la interfaz.</p>
+                </div>
+                """))
+                return
             
-            r_6_cursos = (len(cursos_sel) >= 6)
             if not r_6_cursos:
                 display(widgets.HTML(f"""
                 <div style="background: #fef2f2; border-left: 5px solid #dc2626; padding: 14px; border-radius: 6px; margin: 12px 0; font-family: sans-serif;">
@@ -923,11 +1120,10 @@ def iniciar_interfaz():
                 """))
                 return
 
-            if estudiantes_ciclo_select.value == '' or max_alternativas_gen.value == '':
+            if total_est is None or max_alternativas_gen.value == '':
                 print("Selecciona el ciclo, el total de estudiantes y cuántas alternativas generar.")
                 return
 
-            total_est = int(estudiantes_ciclo_select.value)
             if total_est < 16:
                 print("El número total de estudiantes debe ser al menos 16.")
                 return
@@ -939,18 +1135,47 @@ def iniciar_interfaz():
                 
                 ids_sel = [c["id"] for c in cursos_sel]
                 cursos_filtrados = [c for c in d_json["cursos"] if c["id"] in ids_sel]
-                grupos_filtrados = [g for g in d_json["grupos_laboratorio"] if g["curso_id"] in [c["id"] for c in cursos_filtrados]]
                 cohorte_ciclo = f"ciclo-{ciclo}"
                 for curso in cursos_filtrados:
                     curso["cohorte_id"] = cohorte_ciclo
-                for grupo in grupos_filtrados:
-                    grupo["cohorte_id"] = cohorte_ciclo
+                capacidad_lab_maxima = max(
+                    (
+                        aula.get("capacidad", 0)
+                        for aula in d_json["aulas"]
+                        if aula.get("tipo") == "laboratorio"
+                        and aula.get("tiene_computadoras", False)
+                    ),
+                    default=0,
+                )
+                cantidad_grupos = max(
+                    int(d_json["configuracion"].get("grupos_por_curso_laboratorio", 3)),
+                    (total_est + capacidad_lab_maxima - 1) // capacidad_lab_maxima
+                    if capacidad_lab_maxima else 0,
+                )
+                tamanos_grupo = [
+                    total_est // cantidad_grupos
+                    + (1 if indice < total_est % cantidad_grupos else 0)
+                    for indice in range(cantidad_grupos)
+                ] if cantidad_grupos else []
+                grupos_filtrados = []
+                for curso in cursos_filtrados:
+                    if not curso.get("requiere_laboratorio", False):
+                        continue
+                    for indice, cantidad in enumerate(tamanos_grupo, 1):
+                        grupos_filtrados.append({
+                            "id": f"grupo-{curso['id']}-{cohorte_ciclo}-s{indice}",
+                            "curso_id": curso["id"],
+                            "cohorte_id": cohorte_ciclo,
+                            "cantidad_estudiantes": cantidad,
+                            "subcohorte_id": f"{cohorte_ciclo}-seccion-{indice}",
+                        })
                 
                 d_json["cursos"] = cursos_filtrados
                 d_json["grupos_laboratorio"] = grupos_filtrados
                 d_json["configuracion"]["cursos_por_semestre"] = len(cursos_filtrados)
                 d_json["configuracion"]["cursos_con_laboratorio"] = sum(1 for c in cursos_filtrados if c.get("requiere_laboratorio", False))
                 d_json["configuracion"]["max_horarios"] = int(max_alternativas_gen.value)
+                d_json["configuracion"]["tamano_grupo_objetivo"] = total_est
 
                 datos_plan = datos_planificacion_desde_dict(d_json)
                 agente = AgenteExperto()
@@ -980,6 +1205,7 @@ def iniciar_interfaz():
                     codigos_incidencias.intersection({
                         "aula_inexistente", "aula_no_apta_para_teoria",
                         "aula_no_apta_para_laboratorio", "capacidad_insuficiente",
+                        "capacidad_teoria_insuficiente",
                     })
                 )
                 r_cohorte = bool(validaciones) and not bool(
@@ -1001,6 +1227,10 @@ def iniciar_interfaz():
                         resultado.horarios,
                         int(max_alternativas_gen.value),
                         str(ruta_excel),
+                        cursos=cursos_filtrados,
+                        docentes=d_json["docentes"],
+                        ciclo=ciclo,
+                        total_estudiantes=total_est,
                     )
                     for indice, horario in enumerate(resultado.horarios, 1):
                         sesiones_guardadas = []
