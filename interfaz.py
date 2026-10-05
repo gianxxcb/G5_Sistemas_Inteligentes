@@ -42,6 +42,14 @@ try:
         database_module, "update_reservation", lambda *args, **kwargs: False
     )
     from config import COORDENADAS_FACULTADES
+    import schedule_models as schedule_models_module
+    schedule_models_module = importlib.reload(schedule_models_module)
+    import schedule_input as schedule_input_module
+    schedule_input_module = importlib.reload(schedule_input_module)
+    import schedule_validator as schedule_validator_module
+    schedule_validator_module = importlib.reload(schedule_validator_module)
+    import schedule_optimizer as schedule_optimizer_module
+    schedule_optimizer_module = importlib.reload(schedule_optimizer_module)
     import agent_expert as agent_expert_module
     agent_expert_module = importlib.reload(agent_expert_module)
     AgenteExperto = agent_expert_module.AgenteExperto
@@ -49,8 +57,9 @@ try:
         DatosPlanificacion, ConfiguracionPlanificacion, Curso, 
         Docente, Aula, TipoAula, FranjaSemanal, DiaSemana, GrupoLaboratorio
     )
-    from schedule_optimizer import GeneradorHorarios
-    from schedule_input import cargar_datos_planificacion, datos_planificacion_desde_dict
+    GeneradorHorarios = schedule_optimizer_module.GeneradorHorarios
+    cargar_datos_planificacion = schedule_input_module.cargar_datos_planificacion
+    datos_planificacion_desde_dict = schedule_input_module.datos_planificacion_desde_dict
     BACKEND_DISPONIBLE = True
 except (ImportError, AttributeError) as e:
     BACKEND_DISPONIBLE = False
@@ -411,12 +420,17 @@ def iniciar_interfaz():
     
     facultad_reserva_select = widgets.Dropdown(options=[''] + facultades_registradas, value='', description='🏛 Facultad de Origen:', style=style, layout=layout_campo)
     correo_docente_input = widgets.Text(value='', placeholder='docente@unitru.edu.pe', description='✉️ Correo Docente UNT:', style=style, layout=layout_campo)
+    correo_busqueda_reservas = widgets.Text(
+        value='', placeholder='docente@unitru.edu.pe',
+        description='Correo del docente:', style=style, layout=layout_campo
+    )
 
     btn_consultar_disponibilidad = widgets.Button(
-        description='🔍 Evaluar con Agente Experto y Enviar a n8n', 
-        button_style='primary', 
+        description='Reservar',
+        button_style='danger',
         layout=widgets.Layout(width='620px', height='40px', margin='12px 0px 5px 0px')
     )
+    btn_consultar_disponibilidad.style.button_color = '#c2410c'
 
     output_reserva = widgets.Output()
     btn_buscar_reservas = widgets.Button(
@@ -461,16 +475,30 @@ def iniciar_interfaz():
     ], layout=widgets.Layout(padding='12px', border='1px solid #dbe4ea', border_radius='6px'))
     cambio_box.layout.display = 'none'
 
-    def _hora_24(hora_ampm):
-        return datetime.strptime(hora_ampm.strip(), "%I:%M %p").strftime("%H:%M")
+    def _hora_24(hora_texto):
+        hora_texto = hora_texto.strip().upper()
+        formatos = ("%I:%M %p", "%H:%M")
+        for formato in formatos:
+            try:
+                return datetime.strptime(hora_texto, formato).strftime("%H:%M")
+            except ValueError:
+                continue
+        raise ValueError("La hora debe tener formato HH:MM o HH:MM AM/PM.")
 
-    def _hora_ampm(hora_24):
-        return datetime.strptime(hora_24, "%H:%M").strftime("%I:%M %p")
+    def _hora_ampm(hora_texto):
+        hora_texto = hora_texto.strip().upper()
+        formatos = ("%I:%M %p", "%H:%M")
+        for formato in formatos:
+            try:
+                return datetime.strptime(hora_texto, formato).strftime("%I:%M %p")
+            except ValueError:
+                continue
+        raise ValueError("La hora guardada no tiene un formato reconocido.")
 
     def mostrar_reservas_docente(b):
         with output_reservas_docente:
             output_reservas_docente.clear_output(wait=True)
-            correo = correo_docente_input.value.strip()
+            correo = correo_busqueda_reservas.value.strip()
             if not correo:
                 print("Escribe el correo del docente para consultar sus reservas.")
                 return
@@ -538,7 +566,7 @@ def iniciar_interfaz():
         elif not correo:
             output_reservas_docente.clear_output(wait=True)
 
-    correo_docente_input.observe(buscar_reservas_al_escribir, names='value')
+    correo_busqueda_reservas.observe(buscar_reservas_al_escribir, names='value')
 
     def consultar_opciones_cambio(b):
         with output_opciones_cambio:
@@ -702,6 +730,15 @@ def iniciar_interfaz():
 
     btn_confirmar_cambio.on_click(confirmar_cambio_aceptado)
 
+    def limpiar_formulario_reserva():
+        fecha_reserva_picker.value = date.today()
+        materia_reserva_select.value = ''
+        aforo_reserva_select.value = ''
+        h_ini_reserva.value = ''
+        h_fin_reserva.value = ''
+        facultad_reserva_select.value = ''
+        correo_docente_input.value = ''
+
     def on_consultar_clicked(b):
         with output_reserva:
             output_reserva.clear_output(wait=True)
@@ -810,6 +847,8 @@ def iniciar_interfaz():
                 print(f"[n8n]: Notificación enviada para {correo_docente}.")
             except Exception as e:
                 print(f"Error al conectar con n8n: {e}")
+            finally:
+                limpiar_formulario_reserva()
 
     btn_consultar_disponibilidad.on_click(on_consultar_clicked)
 
@@ -818,7 +857,8 @@ def iniciar_interfaz():
         h_ini_reserva, h_fin_reserva, facultad_reserva_select, correo_docente_input,
         btn_consultar_disponibilidad, output_reserva,
         widgets.HTML("<hr><h4>Reservas existentes del docente</h4>"),
-        btn_buscar_reservas, output_reservas_docente, cambio_box,
+        correo_busqueda_reservas, btn_buscar_reservas,
+        output_reservas_docente, cambio_box,
     ], layout=widgets.Layout(padding='15px', background_color='#ffffff'))
 
     lbl_p2 = widgets.HTML("<h3 style='color: #111827; margin-bottom: 5px;'>Generar horario por ciclo</h3><p style='color:#64748b;margin-top:0'>Selecciona el ciclo, los cursos y las condiciones de generación.</p>")
