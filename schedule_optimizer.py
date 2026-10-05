@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from math import sqrt
+from math import ceil, sqrt
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from schedule_models import (
@@ -32,10 +32,10 @@ _ORDEN_DIAS = {dia: indice for indice, dia in enumerate(DiaSemana)}
 class PreferenciasHorario:
     """Pesos de calidad; los horarios inválidos siempre se descartan."""
 
-    peso_huecos: float = 1.0
-    peso_desbalance_semanal: float = 0.25
+    peso_huecos: float = 0.35
+    peso_desbalance_semanal: float = 4.0
     dias_activos_objetivo: Optional[int] = None
-    peso_dias_fuera_objetivo: float = 120.0
+    peso_dias_fuera_objetivo: float = 500.0
 
     def __post_init__(self) -> None:
         for nombre in (
@@ -144,6 +144,13 @@ class GeneradorHorarios:
         aulas = {aula.id: aula for aula in datos.aulas}
         cursos = {curso.id: curso for curso in datos.cursos}
         grupos = {grupo.id: grupo for grupo in datos.grupos_laboratorio}
+        subcohortes_por_cohorte: Dict[str, Tuple[str, ...]] = {}
+        for grupo in datos.grupos_laboratorio:
+            subcohortes = subcohortes_por_cohorte.get(grupo.cohorte_id, ())
+            if grupo.subcohorte_id not in subcohortes:
+                subcohortes_por_cohorte[grupo.cohorte_id] = (
+                    subcohortes + (grupo.subcohorte_id,)
+                )
         docentes = {docente.id: docente for docente in datos.docentes}
         candidatos = {
             tarea.id: self._crear_candidatos(
@@ -175,17 +182,33 @@ class GeneradorHorarios:
 
         hallados: Dict[Tuple[Tuple[str, str, str], ...], HorarioPropuesto] = {}
         estados = 0
+        estados_pasada = 0
+        soluciones_pasada = 0
         limitado = False
+        cantidad_rotaciones = len(datos.configuracion.dias_habiles)
+        soluciones_maximas_por_pasada = max(
+            1, datos.configuracion.max_horarios
+        )
+        presupuesto_base, presupuesto_sobrante = divmod(
+            self.max_estados, cantidad_rotaciones
+        )
+        presupuestos = [
+            presupuesto_base + (1 if indice < presupuesto_sobrante else 0)
+            for indice in range(cantidad_rotaciones)
+        ]
+        rotacion_dia = 0
+        presupuesto_pasada = presupuestos[0]
 
         def explorar(
             indice: int,
             sesiones: Tuple[SesionProgramada, ...],
         ) -> None:
-            nonlocal estados, limitado
-            if estados >= self.max_estados:
+            nonlocal estados, estados_pasada, soluciones_pasada, limitado
+            if estados >= self.max_estados or estados_pasada >= presupuesto_pasada:
                 limitado = True
                 return
             estados += 1
+            estados_pasada += 1
 
             if indice == len(tareas):
                 validacion = self._validador.validar(datos, sesiones)
@@ -207,28 +230,51 @@ class GeneradorHorarios:
                     anterior.puntaje.penalizacion_total
                 ):
                     hallados[firma] = propuesta
+                    soluciones_pasada += 1
                 return
 
             tarea = tareas[indice]
-            for candidato in candidatos[tarea.id]:
+            cargas_por_subcohorte = _cargas_diarias_por_subcohorte(
+                sesiones, cursos, grupos, subcohortes_por_cohorte
+            )
+            for candidato in sorted(
+                candidatos[tarea.id],
+                key=lambda item: _orden_candidato_por_carga(
+                    item,
+                    cargas_por_subcohorte,
+                    subcohortes_por_cohorte,
+                    cursos,
+                    grupos,
+                    datos.configuracion.dias_habiles,
+                    rotacion_dia,
+                ),
+            ):
                 if not _es_compatible(
                     candidato, sesiones, tarea.curso, cursos, grupos
                 ):
                     continue
                 explorar(indice + 1, sesiones + (candidato,))
-                if estados >= self.max_estados:
+                if soluciones_pasada >= soluciones_maximas_por_pasada:
+                    return
+                if estados >= self.max_estados or estados_pasada >= presupuesto_pasada:
                     limitado = indice + 1 < len(tareas) or limitado
                     return
 
-        explorar(0, ())
-        mejores = tuple(
-            sorted(
-                hallados.values(),
-                key=lambda horario: (
-                    horario.puntaje.penalizacion_total,
-                    _firma_horario(horario.sesiones),
-                ),
-            )[: datos.configuracion.max_horarios]
+        for rotacion_dia, presupuesto_pasada in enumerate(presupuestos):
+            estados_pasada = 0
+            soluciones_pasada = 0
+            explorar(0, ())
+            if estados >= self.max_estados:
+                break
+        ordenados = sorted(
+            hallados.values(),
+            key=lambda horario: (
+                horario.puntaje.penalizacion_total,
+                _firma_horario(horario.sesiones),
+            ),
+        )
+        mejores = _seleccionar_alternativas_diversas(
+            ordenados, datos.configuracion.max_horarios
         )
         completo = not limitado
         if mejores:
@@ -428,6 +474,112 @@ def _es_compatible(
         ):
             return False
     return True
+
+
+def _orden_candidato_por_carga(
+    candidato: SesionProgramada,
+    cargas_por_subcohorte: Dict[Tuple[str, Optional[str], DiaSemana], int],
+    subcohortes_por_cohorte: Dict[str, Tuple[str, ...]],
+    cursos: Dict[str, Curso],
+    grupos: Dict[str, GrupoLaboratorio],
+    dias_habiles: Tuple[DiaSemana, ...],
+    rotacion: int = 0,
+) -> Tuple[int, int, int, str, str]:
+    cohorte_id = cursos[candidato.curso_id].cohorte_id
+    grupo_candidato = grupos.get(candidato.grupo_laboratorio_id or "")
+    subcohortes = (
+        (grupo_candidato.subcohorte_id,)
+        if grupo_candidato is not None
+        else subcohortes_por_cohorte.get(cohorte_id, (None,))
+    )
+    cargas_actuales = [
+        cargas_por_subcohorte.get(
+            (cohorte_id, subcohorte, candidato.franja.dia), 0
+        )
+        for subcohorte in subcohortes
+    ]
+    cargas_proyectadas = [
+        carga + candidato.franja.duracion_minutos for carga in cargas_actuales
+    ]
+    return (
+        max(cargas_proyectadas, default=candidato.franja.duracion_minutos),
+        max(cargas_actuales, default=0),
+        (dias_habiles.index(candidato.franja.dia) - rotacion) % len(dias_habiles),
+        candidato.franja.hora_inicio,
+        candidato.aula_id,
+    )
+
+
+def _cargas_diarias_por_subcohorte(
+    sesiones: Tuple[SesionProgramada, ...],
+    cursos: Dict[str, Curso],
+    grupos: Dict[str, GrupoLaboratorio],
+    subcohortes_por_cohorte: Dict[str, Tuple[str, ...]],
+) -> Dict[Tuple[str, Optional[str], DiaSemana], int]:
+    cargas: Dict[Tuple[str, Optional[str], DiaSemana], int] = {}
+    for sesion in sesiones:
+        curso = cursos.get(sesion.curso_id)
+        if curso is None:
+            continue
+        grupo = grupos.get(sesion.grupo_laboratorio_id or "")
+        subcohortes = (
+            (grupo.subcohorte_id,)
+            if grupo is not None
+            else subcohortes_por_cohorte.get(curso.cohorte_id, (None,))
+        )
+        for subcohorte in subcohortes:
+            clave = (curso.cohorte_id, subcohorte, sesion.franja.dia)
+            cargas[clave] = (
+                cargas.get(clave, 0) + sesion.franja.duracion_minutos
+            )
+    return cargas
+
+
+def _seleccionar_alternativas_diversas(
+    horarios: List[HorarioPropuesto],
+    cantidad: int,
+) -> Tuple[HorarioPropuesto, ...]:
+    seleccionados: List[HorarioPropuesto] = []
+    for horario in horarios:
+        firma_actual = {
+            sesion.id: (
+                sesion.franja.dia,
+                sesion.franja.hora_inicio,
+            )
+            for sesion in horario.sesiones
+        }
+        suficientemente_distinto = True
+        for elegido in seleccionados:
+            firma_elegida = {
+                sesion.id: (
+                    sesion.franja.dia,
+                    sesion.franja.hora_inicio,
+                )
+                for sesion in elegido.sesiones
+            }
+            tareas_comunes = set(firma_actual) & set(firma_elegida)
+            cambios = sum(
+                firma_actual[tarea] != firma_elegida[tarea]
+                for tarea in tareas_comunes
+            ) + len(set(firma_actual) ^ set(firma_elegida))
+            cambios_dia = sum(
+                firma_actual[tarea][0] != firma_elegida[tarea][0]
+                for tarea in tareas_comunes
+            )
+            minimo_cambios = max(
+                1, ceil(max(len(firma_actual), len(firma_elegida)) * 0.05)
+            )
+            minimo_cambios_dia = max(
+                1, ceil(min(len(firma_actual), len(firma_elegida)) * 0.04)
+            )
+            if cambios < minimo_cambios or cambios_dia < minimo_cambios_dia:
+                suficientemente_distinto = False
+                break
+        if suficientemente_distinto:
+            seleccionados.append(horario)
+            if len(seleccionados) == cantidad:
+                break
+    return tuple(seleccionados)
 
 
 def _puntuar_sesiones(

@@ -864,6 +864,22 @@ def iniciar_interfaz():
     lbl_p2 = widgets.HTML("<h3 style='color: #111827; margin-bottom: 5px;'>Generar horario por ciclo</h3><p style='color:#64748b;margin-top:0'>Selecciona el ciclo, los cursos y las condiciones de generación.</p>")
     horarios_guardados = _cargar_horarios_guardados()
     cursos_box = widgets.VBox()
+    cursos_estado_html = widgets.HTML()
+    cursos_box.layout = widgets.Layout(
+        width='100%', max_height='280px', overflow='auto',
+        padding='10px', border='1px solid #dbe4ea',
+        border_radius='6px', background_color='#f8fafc',
+    )
+
+    def actualizar_contador_cursos(change=None):
+        seleccionados = sum(checkbox.value for checkbox in checkbox_list)
+        total = len(checkbox_list)
+        color = '#0f766e' if seleccionados >= 6 else '#b45309'
+        cursos_estado_html.value = (
+            f"<div style='padding:8px 10px;color:{color};font-weight:600'>"
+            f"{seleccionados} de {total} cursos seleccionados · mínimo 6 por ciclo"
+            "</div>"
+        )
 
     def actualizar_checkboxes_cursos():
         global checkbox_list, catalogo_cursos
@@ -883,6 +899,9 @@ def iniciar_interfaz():
             for c in catalogo_cursos
         ]
         cursos_box.children = checkbox_list
+        for checkbox in checkbox_list:
+            checkbox.observe(actualizar_contador_cursos, names='value')
+        actualizar_contador_cursos()
 
     actualizar_checkboxes_cursos()
 
@@ -1216,6 +1235,12 @@ def iniciar_interfaz():
                 d_json["configuracion"]["cursos_con_laboratorio"] = sum(1 for c in cursos_filtrados if c.get("requiere_laboratorio", False))
                 d_json["configuracion"]["max_horarios"] = int(max_alternativas_gen.value)
                 d_json["configuracion"]["tamano_grupo_objetivo"] = total_est
+                d_json["configuracion"]["dias_activos_objetivo"] = min(
+                    5,
+                    len(d_json["configuracion"].get("dias_habiles") or (
+                        "lunes", "martes", "miercoles", "jueves", "viernes"
+                    )),
+                )
 
                 datos_plan = datos_planificacion_desde_dict(d_json)
                 agente = AgenteExperto()
@@ -1411,8 +1436,12 @@ def iniciar_interfaz():
     ], layout=widgets.Layout(padding='18px', background_color='#ffffff'))
 
     generar_box = widgets.VBox([
-        lbl_p2, ciclo_generacion_select, cursos_box, widgets.HTML("<hr>"),
+        lbl_p2,
+        widgets.HTML("<h4 style='margin:12px 0 4px;color:#173f5f'>1. Ciclo y cursos</h4>"),
+        ciclo_generacion_select, cursos_estado_html, cursos_box,
+        widgets.HTML("<hr style='border:0;border-top:1px solid #dbe4ea;margin:14px 0'>"),
         widgets.HBox([btn_toggle_form, btn_toggle_modificar]), form_nuevo_curso_box,
+        widgets.HTML("<h4 style='margin:12px 0 4px;color:#173f5f'>2. Matrícula y alternativas</h4>"),
         estudiantes_ciclo_select, max_alternativas_gen,
         btn_generar_horarios, output_generacion
     ], layout=widgets.Layout(padding='15px', background_color='#ffffff'))

@@ -118,6 +118,62 @@ def crear_carga_semestral_completa() -> DatosPlanificacion:
 
 
 class GeneradorHorariosTests(unittest.TestCase):
+    def test_distribuye_cursos_en_cinco_dias_y_varia_las_alternativas(self) -> None:
+        disponibilidad = tuple(
+            FranjaSemanal(dia, "07:00", "22:00")
+            for dia in (
+                DiaSemana.LUNES,
+                DiaSemana.MARTES,
+                DiaSemana.MIERCOLES,
+                DiaSemana.JUEVES,
+                DiaSemana.VIERNES,
+            )
+        )
+        docente = Docente("docente", "Docente", disponibilidad)
+        cursos = tuple(
+            Curso(f"curso-{indice}", f"Curso {indice}", docente.id, "ciclo-I", 120)
+            for indice in range(1, 7)
+        )
+        aulas = tuple(
+            Aula(f"teoria-{indice}", 60, TipoAula.TEORIA)
+            for indice in range(1, 8)
+        ) + tuple(
+            Aula(f"lab-{indice}", 60, TipoAula.LABORATORIO, True)
+            for indice in range(1, 6)
+        )
+        configuracion = ConfiguracionPlanificacion(
+            cursos_por_semestre=6,
+            cursos_con_laboratorio=0,
+            max_horarios=3,
+            dias_activos_objetivo=5,
+            tamano_grupo_objetivo=34,
+        )
+        datos = DatosPlanificacion(
+            docentes=(docente,),
+            cursos=cursos,
+            aulas=aulas,
+            configuracion=configuracion,
+        )
+
+        resultado = GeneradorHorarios(max_estados=5000).generar(datos)
+
+        self.assertEqual(len(resultado.horarios), 3)
+        distribuciones = []
+        for horario in resultado.horarios:
+            carga_diaria = {}
+            for sesion in horario.sesiones:
+                carga_diaria[sesion.franja.dia] = (
+                    carga_diaria.get(sesion.franja.dia, 0)
+                    + sesion.franja.duracion_minutos // 60
+                )
+            self.assertEqual(set(carga_diaria), set(configuracion.dias_habiles))
+            self.assertLessEqual(max(carga_diaria.values()), 4)
+            distribuciones.append(
+                tuple(sorted((sesion.id, sesion.franja.dia) for sesion in horario.sesiones))
+            )
+            self.assertTrue(ValidadorHorario().validar(datos, horario.sesiones).valido)
+        self.assertEqual(len(set(distribuciones)), len(resultado.horarios))
+
     def test_genera_hasta_cinco_horarios_validos_y_ordenados(self) -> None:
         datos = crear_datos_planificables()
         resultado = GeneradorHorarios(max_estados=3000).generar(datos)
