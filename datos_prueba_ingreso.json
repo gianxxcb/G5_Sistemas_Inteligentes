@@ -47,10 +47,336 @@
           "hora_fin": "22:00"
         }
       ]
+    },
+    {
+      "id": "doc-43626983",
+      "nombre": "Boy",
+      "disponibilidad": [
+        {
+          "dia": "lunes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "martes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "miercoles",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "jueves",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "viernes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        }
+      ]
+    },
+    {
+      "id": "doc-20f3fef6",
+      "nombre": "Juan",
+      "disponibilidad": [
+        {
+          "dia": "lunes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "martes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "miercoles",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "jueves",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "viernes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        }
+      ]
+    },
+    {
+      "id": "doc-517d308f",
+      "nombre": "Marcelino",
+      "disponibilidad": [
+        {
+          "dia": "lunes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "martes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "miercoles",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "jueves",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "viernes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        }
+      ]
+    },
+    {
+      "id": "doc-16d32025",
+      "nombre": "Joe Gonzales",
+      "disponibilidad": [
+        {
+          "dia": "lunes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "martes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "miercoles",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "jueves",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "viernes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        }
+      ]
+    },
+    {
+      "id": "doc-03ce5000",
+      "nombre": "kevin",
+      "disponibilidad": [
+        {
+          "dia": "lunes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "martes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "miercoles",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "jueves",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "viernes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        }
+      ]
+    },
+    {
+      "id": "doc-c7b70a22",
+      "nombre": "Arellano",
+      "disponibilidad": [
+        {
+          "dia": "lunes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "martes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "miercoles",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "jueves",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        },
+        {
+          "dia": "viernes",
+          "hora_inicio": "07:00",
+          "hora_fin": "22:00"
+        }
+      ]
     }
   ],
-  "cursos": [],
-  "grupos_laboratorio": [],
+  "cursos": [
+    {
+      "id": "p2022-curso-6078a39b",
+      "nombre": "Ingeniería de Datos II",
+      "docente_id": "doc-43626983",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 180,
+      "requiere_laboratorio": true,
+      "duracion_laboratorio_minutos": 180
+    },
+    {
+      "id": "p2022-curso-74f5e072",
+      "nombre": "Ingeniería de Requerimientos",
+      "docente_id": "doc-20f3fef6",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 60,
+      "requiere_laboratorio": true,
+      "duracion_laboratorio_minutos": 120
+    },
+    {
+      "id": "p2022-curso-d38cd1c3",
+      "nombre": "Sistemas Inteligentes",
+      "docente_id": "doc-517d308f",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 180,
+      "requiere_laboratorio": true,
+      "duracion_laboratorio_minutos": 120
+    },
+    {
+      "id": "p2022-curso-94a1910d",
+      "nombre": "Ingeniería Económica",
+      "docente_id": "doc-16d32025",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 240,
+      "requiere_laboratorio": false,
+      "duracion_laboratorio_minutos": null
+    },
+    {
+      "id": "p2022-curso-59bca7bd",
+      "nombre": "Finanzas Corporativas",
+      "docente_id": "doc-03ce5000",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 240,
+      "requiere_laboratorio": false,
+      "duracion_laboratorio_minutos": null
+    },
+    {
+      "id": "p2022-curso-f8720432",
+      "nombre": "Sistemas Operativos",
+      "docente_id": "doc-c7b70a22",
+      "cohorte_id": "cohorte-1",
+      "duracion_minutos": 120,
+      "requiere_laboratorio": true,
+      "duracion_laboratorio_minutos": 120
+    }
+  ],
+  "grupos_laboratorio": [
+    {
+      "id": "grupo-p2022-curso-6078a39b-s1",
+      "curso_id": "p2022-curso-6078a39b",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-1"
+    },
+    {
+      "id": "grupo-p2022-curso-6078a39b-s2",
+      "curso_id": "p2022-curso-6078a39b",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-2"
+    },
+    {
+      "id": "grupo-p2022-curso-6078a39b-s3",
+      "curso_id": "p2022-curso-6078a39b",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-3"
+    },
+    {
+      "id": "grupo-p2022-curso-74f5e072-s1",
+      "curso_id": "p2022-curso-74f5e072",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-1"
+    },
+    {
+      "id": "grupo-p2022-curso-74f5e072-s2",
+      "curso_id": "p2022-curso-74f5e072",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-2"
+    },
+    {
+      "id": "grupo-p2022-curso-74f5e072-s3",
+      "curso_id": "p2022-curso-74f5e072",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-3"
+    },
+    {
+      "id": "grupo-p2022-curso-d38cd1c3-s1",
+      "curso_id": "p2022-curso-d38cd1c3",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-1"
+    },
+    {
+      "id": "grupo-p2022-curso-d38cd1c3-s2",
+      "curso_id": "p2022-curso-d38cd1c3",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-2"
+    },
+    {
+      "id": "grupo-p2022-curso-d38cd1c3-s3",
+      "curso_id": "p2022-curso-d38cd1c3",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-3"
+    },
+    {
+      "id": "grupo-p2022-curso-f8720432-s1",
+      "curso_id": "p2022-curso-f8720432",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-1"
+    },
+    {
+      "id": "grupo-p2022-curso-f8720432-s2",
+      "curso_id": "p2022-curso-f8720432",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-2"
+    },
+    {
+      "id": "grupo-p2022-curso-f8720432-s3",
+      "curso_id": "p2022-curso-f8720432",
+      "cohorte_id": "cohorte-1",
+      "cantidad_estudiantes": 15,
+      "subcohorte_id": "seccion-3"
+    }
+  ],
   "aulas": [
     {
       "id": "A101",

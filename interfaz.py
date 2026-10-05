@@ -65,7 +65,7 @@ except (ImportError, AttributeError) as e:
     BACKEND_DISPONIBLE = False
     BACKEND_ERROR = f"{type(e).__name__}: {e}"
 
-WEBHOOK_N8N_URL = "https://acorn-pushiness-authentic.ngrok-free.dev/webhook/40e725c6-cc5d-4dbb-81e4-0f9cb91277c3"
+WEBHOOK_N8N_URL = " https://acorn-pushiness-authentic.ngrok-free.dev/webhook/40e725c6-cc5d-4dbb-81e4-0f9cb91277c3"
 
 aulas_registradas = get_all_rooms() if BACKEND_DISPONIBLE else []
 aforos_registrados_db = sorted(list(set(aula["aforo_max"] for aula in aulas_registradas))) if aulas_registradas else [30, 35, 40, 45, 50, 55, 60]

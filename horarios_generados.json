@@ -1,0 +1,391 @@
+{
+  "I": [
+    {
+      "id": "483f25921afa4d52b84ddf54aeb186b7",
+      "nombre": "Alternativa 1",
+      "creado": "2026-10-05",
+      "puntaje": 110.0,
+      "archivo_excel": "/content/G5_Sistemas_Inteligentes/HORARIO_CICLO_I_GENERADO.xlsx",
+      "sesiones": [
+        {
+          "curso": "Ingeniería de Requerimientos",
+          "docente": "Juan",
+          "dia": "LUNES",
+          "hora_inicio": "07:00",
+          "hora_fin": "09:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-74f5e072-ciclo-I-s1"
+        },
+        {
+          "curso": "Ingeniería de Requerimientos",
+          "docente": "Juan",
+          "dia": "LUNES",
+          "hora_inicio": "09:00",
+          "hora_fin": "11:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-74f5e072-ciclo-I-s2"
+        },
+        {
+          "curso": "Ingeniería de Requerimientos",
+          "docente": "Juan",
+          "dia": "LUNES",
+          "hora_inicio": "11:00",
+          "hora_fin": "13:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-74f5e072-ciclo-I-s3"
+        },
+        {
+          "curso": "Ingeniería Económica",
+          "docente": "Joe Gonzales",
+          "dia": "LUNES",
+          "hora_inicio": "13:00",
+          "hora_fin": "17:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Sistemas Inteligentes",
+          "docente": "Marcelino",
+          "dia": "MARTES",
+          "hora_inicio": "07:00",
+          "hora_fin": "09:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-d38cd1c3-ciclo-I-s1"
+        },
+        {
+          "curso": "Sistemas Inteligentes",
+          "docente": "Marcelino",
+          "dia": "MARTES",
+          "hora_inicio": "09:00",
+          "hora_fin": "11:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-d38cd1c3-ciclo-I-s2"
+        },
+        {
+          "curso": "Sistemas Inteligentes",
+          "docente": "Marcelino",
+          "dia": "MARTES",
+          "hora_inicio": "11:00",
+          "hora_fin": "13:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-d38cd1c3-ciclo-I-s3"
+        },
+        {
+          "curso": "Ingeniería de Datos II",
+          "docente": "Boy",
+          "dia": "MARTES",
+          "hora_inicio": "13:00",
+          "hora_fin": "16:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Sistemas Operativos",
+          "docente": "Arellano",
+          "dia": "MIERCOLES",
+          "hora_inicio": "07:00",
+          "hora_fin": "09:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-f8720432-ciclo-I-s1"
+        },
+        {
+          "curso": "Sistemas Operativos",
+          "docente": "Arellano",
+          "dia": "MIERCOLES",
+          "hora_inicio": "09:00",
+          "hora_fin": "11:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-f8720432-ciclo-I-s2"
+        },
+        {
+          "curso": "Sistemas Operativos",
+          "docente": "Arellano",
+          "dia": "MIERCOLES",
+          "hora_inicio": "11:00",
+          "hora_fin": "13:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-f8720432-ciclo-I-s3"
+        },
+        {
+          "curso": "Sistemas Inteligentes",
+          "docente": "Marcelino",
+          "dia": "MIERCOLES",
+          "hora_inicio": "13:00",
+          "hora_fin": "16:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Finanzas Corporativas",
+          "docente": "kevin",
+          "dia": "JUEVES",
+          "hora_inicio": "07:00",
+          "hora_fin": "11:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Ingeniería de Requerimientos",
+          "docente": "Juan",
+          "dia": "JUEVES",
+          "hora_inicio": "11:30",
+          "hora_fin": "12:30",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Ingeniería de Datos II",
+          "docente": "Boy",
+          "dia": "VIERNES",
+          "hora_inicio": "07:00",
+          "hora_fin": "10:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-6078a39b-ciclo-I-s1"
+        },
+        {
+          "curso": "Ingeniería de Datos II",
+          "docente": "Boy",
+          "dia": "VIERNES",
+          "hora_inicio": "10:00",
+          "hora_fin": "13:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-6078a39b-ciclo-I-s2"
+        },
+        {
+          "curso": "Ingeniería de Datos II",
+          "docente": "Boy",
+          "dia": "VIERNES",
+          "hora_inicio": "13:00",
+          "hora_fin": "16:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-6078a39b-ciclo-I-s3"
+        },
+        {
+          "curso": "Sistemas Operativos",
+          "docente": "Arellano",
+          "dia": "VIERNES",
+          "hora_inicio": "16:00",
+          "hora_fin": "18:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        }
+      ]
+    },
+    {
+      "id": "86e4649b16864821b75807a1b9855d8b",
+      "nombre": "Alternativa 2",
+      "creado": "2026-10-05",
+      "puntaje": 110.0,
+      "archivo_excel": "/content/G5_Sistemas_Inteligentes/HORARIO_CICLO_I_GENERADO.xlsx",
+      "sesiones": [
+        {
+          "curso": "Finanzas Corporativas",
+          "docente": "kevin",
+          "dia": "LUNES",
+          "hora_inicio": "07:00",
+          "hora_fin": "11:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Ingeniería de Requerimientos",
+          "docente": "Juan",
+          "dia": "LUNES",
+          "hora_inicio": "11:30",
+          "hora_fin": "12:30",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Ingeniería de Datos II",
+          "docente": "Boy",
+          "dia": "MARTES",
+          "hora_inicio": "07:00",
+          "hora_fin": "10:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-6078a39b-ciclo-I-s1"
+        },
+        {
+          "curso": "Ingeniería de Datos II",
+          "docente": "Boy",
+          "dia": "MARTES",
+          "hora_inicio": "10:00",
+          "hora_fin": "13:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-6078a39b-ciclo-I-s2"
+        },
+        {
+          "curso": "Ingeniería de Datos II",
+          "docente": "Boy",
+          "dia": "MARTES",
+          "hora_inicio": "13:00",
+          "hora_fin": "16:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-6078a39b-ciclo-I-s3"
+        },
+        {
+          "curso": "Sistemas Operativos",
+          "docente": "Arellano",
+          "dia": "MARTES",
+          "hora_inicio": "16:00",
+          "hora_fin": "18:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Ingeniería de Requerimientos",
+          "docente": "Juan",
+          "dia": "MIERCOLES",
+          "hora_inicio": "07:00",
+          "hora_fin": "09:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-74f5e072-ciclo-I-s1"
+        },
+        {
+          "curso": "Ingeniería de Requerimientos",
+          "docente": "Juan",
+          "dia": "MIERCOLES",
+          "hora_inicio": "09:00",
+          "hora_fin": "11:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-74f5e072-ciclo-I-s2"
+        },
+        {
+          "curso": "Ingeniería de Requerimientos",
+          "docente": "Juan",
+          "dia": "MIERCOLES",
+          "hora_inicio": "11:00",
+          "hora_fin": "13:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-74f5e072-ciclo-I-s3"
+        },
+        {
+          "curso": "Ingeniería Económica",
+          "docente": "Joe Gonzales",
+          "dia": "MIERCOLES",
+          "hora_inicio": "13:00",
+          "hora_fin": "17:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Sistemas Inteligentes",
+          "docente": "Marcelino",
+          "dia": "JUEVES",
+          "hora_inicio": "07:00",
+          "hora_fin": "09:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-d38cd1c3-ciclo-I-s1"
+        },
+        {
+          "curso": "Sistemas Inteligentes",
+          "docente": "Marcelino",
+          "dia": "JUEVES",
+          "hora_inicio": "09:00",
+          "hora_fin": "11:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-d38cd1c3-ciclo-I-s2"
+        },
+        {
+          "curso": "Sistemas Inteligentes",
+          "docente": "Marcelino",
+          "dia": "JUEVES",
+          "hora_inicio": "11:00",
+          "hora_fin": "13:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-d38cd1c3-ciclo-I-s3"
+        },
+        {
+          "curso": "Ingeniería de Datos II",
+          "docente": "Boy",
+          "dia": "JUEVES",
+          "hora_inicio": "13:00",
+          "hora_fin": "16:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        },
+        {
+          "curso": "Sistemas Operativos",
+          "docente": "Arellano",
+          "dia": "VIERNES",
+          "hora_inicio": "07:00",
+          "hora_fin": "09:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-f8720432-ciclo-I-s1"
+        },
+        {
+          "curso": "Sistemas Operativos",
+          "docente": "Arellano",
+          "dia": "VIERNES",
+          "hora_inicio": "09:00",
+          "hora_fin": "11:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-f8720432-ciclo-I-s2"
+        },
+        {
+          "curso": "Sistemas Operativos",
+          "docente": "Arellano",
+          "dia": "VIERNES",
+          "hora_inicio": "11:00",
+          "hora_fin": "13:00",
+          "aula": "B201",
+          "tipo": "Laboratorio",
+          "grupo": "grupo-p2022-curso-f8720432-ciclo-I-s3"
+        },
+        {
+          "curso": "Sistemas Inteligentes",
+          "docente": "Marcelino",
+          "dia": "VIERNES",
+          "hora_inicio": "13:00",
+          "hora_fin": "16:00",
+          "aula": "A101",
+          "tipo": "Teoría",
+          "grupo": ""
+        }
+      ]
+    }
+  ],
+  "II": [],
+  "III": [],
+  "IV": [],
+  "V": [],
+  "VI": [],
+  "VII": [],
+  "VIII": [],
+  "IX": [],
+  "X": []
+}
